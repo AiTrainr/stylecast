@@ -938,8 +938,12 @@ function buildBgSwatches(){
     const isCurrent=pickedBgColor.toUpperCase()===hex.toUpperCase();
     if(isCurrent)d.classList.add('selected');
     d.addEventListener('click',()=>{
-      pickedBgColor=hex;syncBgColorPreview();
-      wrap.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');
+      pickedBgColor=hex;
+      syncBgColorPreview();
+      wrap.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));
+      d.classList.add('selected');
+      // Live preview: show the color immediately in the sheet backdrop
+      previewBgLive(hex);
     });
     wrap.appendChild(d);
   });
@@ -1004,7 +1008,8 @@ function openBgColorPicker(){
 }
 
 function closeBgSheet(){
-  // Update preview dots in settings
+  // Restore correct day/night color (in case user previewed but didn't apply)
+  applyStoredColors();
   const dayDot=document.getElementById('bg-day-dot');
   const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
@@ -1012,11 +1017,17 @@ function closeBgSheet(){
   closeSheet('sheet-bg-color');
 }
 
+function previewBgLive(hex){
+  // Show color immediately so user gets visual feedback even in opposite mode
+  document.documentElement.style.setProperty('--bg',hex);
+}
+
 function applyBgColor(){
   const key=bgTab==='day'?'bgColorDay':'bgColorNight';
-  DB.prefs[key]=pickedBgColor;save();
-  applyStoredColors();
-  // Update dots in settings
+  DB.prefs[key]=pickedBgColor;
+  save();
+  // Apply immediately so user sees the change right now
+  document.documentElement.style.setProperty('--bg',pickedBgColor);
   const dayDot=document.getElementById('bg-day-dot');
   const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
@@ -1025,7 +1036,6 @@ function applyBgColor(){
 
 function applyStoredColors(){
   const isNight=document.body.classList.contains('night-mode');
-  // Migrate stale single bgColor to day slot
   if(DB.prefs.bgColor&&!DB.prefs.bgColorDay){DB.prefs.bgColorDay=DB.prefs.bgColor;delete DB.prefs.bgColor;save();}
   const dayColor=DB.prefs.bgColorDay||'#FFEDDD';
   const nightColor=DB.prefs.bgColorNight||'#2D1F4A';
@@ -1036,6 +1046,8 @@ function resetBgColor(){
   const key=bgTab==='day'?'bgColorDay':'bgColorNight';
   delete DB.prefs[key];save();
   applyStoredColors();
+  pickedBgColor=bgTab==='day'?'#FFEDDD':'#2D1F4A';
+  syncBgColorPreview();
 }
 
 // ── Weather ───────────────────────────────────────────────────────────────
