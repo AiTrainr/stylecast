@@ -11,7 +11,6 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  /* Day palette */
   --bg:#FFEDDD;--card:#FFFFFF;--surface:#F5EDE0;
   --border:rgba(207,185,126,0.35);--sand:#CFB97E;
   --primary:#68C7C1;--accent:#BCDDDC;--peach:#FDC1B4;
@@ -20,7 +19,6 @@
   --log-own-bg:#F5E6C8;--log-own-color:#7A5A1A;--log-own-border:#CFB97E;
   --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
 }
-/* Night mode overrides */
 body.night-mode{
   --bg:#1E1628;--card:#2A1F3D;--surface:#362952;
   --border:rgba(117,95,158,0.4);--sand:#9B82C4;
@@ -32,7 +30,7 @@ body.night-mode{
 html,body{height:100%;overflow:hidden;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;background:var(--bg);color:var(--text);transition:background .8s,color .4s;}
 #app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;padding-top:var(--safe-top);}
-.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 8px;min-height:0;}
+.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 8px;min-height:0;}
 .screen.active{display:flex;flex-direction:column;gap:10px;}
 
 /* Nav */
@@ -49,14 +47,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-
 .card{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:12px 14px;transition:background .4s,border-color .4s;}
 .card-title{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;}
 
-/* ── Compact weather card ── */
-#wx-card{
-  border-radius:14px;padding:11px 14px;
-  border:2.5px solid var(--primary);
-  background:#F5EDD8;
-  transition:background .4s,border-color .4s;
-  display:flex;align-items:center;gap:12px;
-}
+/* Compact weather card */
+#wx-card{border-radius:14px;padding:11px 14px;border:2.5px solid var(--primary);background:#F5EDD8;transition:background .4s,border-color .4s;display:flex;align-items:center;gap:12px;}
 body.night-mode #wx-card{background:#2A1F3D;}
 #wx-left{font-size:34px;line-height:1;flex-shrink:0;}
 #wx-mid{flex:1;min-width:0;}
@@ -65,15 +57,27 @@ body.night-mode #wx-card{background:#2A1F3D;}
 #wx-hilo{font-size:12px;opacity:.7;white-space:nowrap;}
 #wx-condition{font-size:11px;font-weight:600;opacity:.65;letter-spacing:.3px;margin-top:1px;}
 #wx-date-loc{font-size:11px;opacity:.6;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#wx-feel{
-  display:inline-flex;align-items:center;
-  font-size:11px;font-weight:600;
-  padding:3px 9px;border-radius:99px;
-  background:rgba(104,199,193,.18);color:var(--primary);
-  white-space:nowrap;flex-shrink:0;align-self:center;
-}
+#wx-feel{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;background:rgba(104,199,193,.18);color:var(--primary);white-space:nowrap;flex-shrink:0;align-self:center;}
 
-/* Outfit items */
+/* Greeting */
+.greeting{font-size:13px;color:var(--muted);font-weight:500;padding:2px 0;}
+.greeting strong{color:var(--text);}
+
+/* Outfit section header + temp basis pills */
+.outfit-header{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.outfit-header-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.temp-basis-pills{display:flex;gap:4px;}
+.tb-pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;border:0.5px solid var(--sand);background:var(--card);color:var(--muted);cursor:pointer;transition:background .12s,color .12s;}
+.tb-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* Office toggle row */
+.office-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:10px;padding:10px 14px;border:0.5px solid var(--border);transition:background .4s;}
+.office-row-left{display:flex;align-items:center;gap:8px;}
+.office-icon{font-size:16px;}
+.office-label{font-size:14px;font-weight:600;}
+.office-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* Outfit items - slot order: outerwear, top, bottom, socks, shoes */
 .outfit-item{display:flex;align-items:center;background:var(--card);border-radius:12px;padding:13px 14px;border:0.5px solid var(--border);gap:10px;min-height:58px;transition:background .4s,border-color .4s;}
 .outfit-item-name{flex:1;font-size:15px;font-weight:500;}
 .lock-btn{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;opacity:.28;transition:opacity .15s;}
@@ -90,13 +94,13 @@ body.night-mode #wx-card{background:#2A1F3D;}
 .badge-socks     {background:#E8E4DA;      color:#4A3A28;}
 .badge-formal    {background:#EEEAE4;      color:#5A4A3A;}
 .badge-dress     {background:#EDD5F0;      color:#5A2070;}
-body.night-mode .badge-tops      {background:#4A6A6A;color:#A8DCDC;}
-body.night-mode .badge-outerwear {background:#5A4A2A;color:#D4B87A;}
-body.night-mode .badge-bottoms   {background:#6A3A3A;color:#E4A8A8;}
-body.night-mode .badge-shoes     {background:#5A4A1A;color:#D4B870;}
-body.night-mode .badge-socks     {background:#3A3A3A;color:#B4B4B4;}
-body.night-mode .badge-formal    {background:#3A3040;color:#B8B0C8;}
-body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
+body.night-mode .badge-tops      {background:#2A5A58;color:#90D8D4;}
+body.night-mode .badge-outerwear {background:#4A3A18;color:#D4B870;}
+body.night-mode .badge-bottoms   {background:#5A2828;color:#E49898;}
+body.night-mode .badge-shoes     {background:#4A3A10;color:#D4B060;}
+body.night-mode .badge-socks     {background:#303028;color:#B4B0A0;}
+body.night-mode .badge-formal    {background:#2A2838;color:#A8A0C0;}
+body.night-mode .badge-dress     {background:#482058;color:#D0A0E8;}
 
 /* Color blob */
 .color-blob{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(0,0,0,.12);flex-shrink:0;display:inline-block;vertical-align:middle;}
@@ -105,16 +109,14 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 .today-btns{display:flex;flex-direction:column;gap:8px;}
 .today-btns-top{display:flex;gap:8px;}
 .today-btns-top .btn{flex:1;}
-/* "Log my own" — distinct warm filled style */
-#btn-log-own{
-  background:var(--log-own-bg);
-  color:var(--log-own-color);
+#btn-log-own,#btn-log-own-empty{
+  background:var(--log-own-bg);color:var(--log-own-color);
   border:1.5px solid var(--log-own-border);
-  font-size:14px;font-weight:600;
-  width:100%;padding:12px;border-radius:12px;
-  cursor:pointer;transition:opacity .15s,background .4s;
+  font-size:14px;font-weight:600;width:100%;padding:12px;
+  border-radius:12px;cursor:pointer;transition:opacity .15s,background .4s;
+  margin-top:4px;
 }
-#btn-log-own:active{opacity:.7;}
+#btn-log-own:active,#btn-log-own-empty:active{opacity:.7;}
 
 /* Buttons */
 .btn{flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s,background .4s;text-align:center;}
@@ -122,14 +124,21 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 .btn-primary  {background:var(--primary);color:#fff;}
 .btn-secondary{background:var(--surface);color:var(--text);border:0.5px solid var(--sand);}
 .btn-danger   {background:#FDEAE4;color:#7A2E1E;}
+.btn-outline  {background:transparent;color:var(--text);border:1.5px solid var(--sand);}
 .btn-row{display:flex;gap:8px;}
 
 /* Pills */
 .pill-scroll{flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none;}
 .pill-scroll::-webkit-scrollbar{display:none;}
 .pill-row{display:flex;gap:6px;width:max-content;}
-.pill{white-space:nowrap;padding:7px 15px;border-radius:99px;font-size:13px;font-weight:600;border:0.5px solid var(--sand);background:var(--card);color:var(--text);cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+.pill{white-space:nowrap;padding:7px 15px;border-radius:99px;font-size:13px;font-weight:600;border:0.5px solid var(--sand);background:var(--card);color:var(--text);cursor:pointer;transition:background .15s,color .15s;}
 .pill.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* Toggle */
+.toggle{width:50px;height:30px;background:#ccc;border-radius:15px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0;}
+.toggle.on{background:var(--primary);}
+.toggle::after{content:'';position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{transform:translateX(20px);}
 
 /* List items */
 .list-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:12px 14px;border:0.5px solid var(--border);cursor:pointer;transition:background .4s,border-color .4s;}
@@ -152,32 +161,40 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid var(--border);}
 .toggle-row:last-child{border-bottom:none;}
 .toggle-label{font-size:15px;}
-.toggle{width:50px;height:30px;background:#ccc;border-radius:15px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0;}
-.toggle.on{background:var(--primary);}
-.toggle::after{content:'';position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-.toggle.on::after{transform:translateX(20px);}
 
-/* ── Color picker ── */
+/* Color picker */
 .color-picker-section{display:flex;flex-direction:column;gap:10px;}
 .color-swatches{display:flex;flex-wrap:wrap;gap:8px;}
 .color-swatch{width:32px;height:32px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;flex-shrink:0;}
 .color-swatch:active{transform:scale(.88);}
 .color-swatch.selected{border-color:var(--text) !important;transform:scale(1.15);}
 .color-wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
-#color-canvas{border-radius:50%;cursor:crosshair;touch-action:none;display:block;max-width:240px;width:100%;}
+#color-canvas,#bg-color-canvas{border-radius:50%;cursor:crosshair;touch-action:none;display:block;max-width:220px;width:100%;}
 .brightness-row{display:flex;align-items:center;gap:10px;width:100%;}
 .brightness-row label{font-size:12px;color:var(--muted);white-space:nowrap;}
-#brightness-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,#000,#fff);outline:none;cursor:pointer;}
-#brightness-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--card);border:2px solid var(--sand);cursor:pointer;}
+.brightness-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,#000,#fff);outline:none;cursor:pointer;}
+.brightness-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--card);border:2px solid var(--sand);cursor:pointer;}
 .color-preview-row{display:flex;align-items:center;gap:10px;}
 .color-preview-dot{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(0,0,0,.15);flex-shrink:0;}
 .color-preview-hex{font-size:13px;color:var(--muted);font-family:monospace;}
+
+/* BG color swatches (larger, rectangular) */
+.bg-swatch{width:44px;height:44px;border-radius:10px;border:2.5px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;flex-shrink:0;}
+.bg-swatch.selected{border-color:var(--text) !important;transform:scale(1.1);}
 
 /* Search */
 .search-wrap{position:relative;flex-shrink:0;}
 .search-input{width:100%;padding:10px 14px 10px 36px;border-radius:10px;border:0.5px solid var(--sand);background:var(--card);font-size:15px;color:var(--text);outline:none;-webkit-appearance:none;transition:background .4s;}
 .search-input:focus{border-color:var(--primary);}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2;pointer-events:none;}
+
+/* Manual log - category section headers */
+.manual-cat-header{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 0 4px;border-bottom:0.5px solid var(--border);margin-bottom:2px;}
+.manual-log-item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:10px;padding:12px 14px;border:0.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s;}
+.manual-log-item.selected-item{border-color:var(--primary);background:rgba(104,199,193,.08);}
+.manual-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--sand);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
+.manual-radio.checked{border-color:var(--primary);background:var(--primary);}
+.manual-radio.checked::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff;}
 
 /* Feedback */
 .feedback-block{background:var(--card);border-radius:12px;padding:12px 14px;border:0.5px solid var(--border);transition:background .4s;}
@@ -200,6 +217,11 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 .feel-great{background:#BCDDDC;color:#1E4A49;}.feel-warm{background:#FACA78;color:#5A3A08;}
 .feel-tooHot{background:#FDC1B4;color:#7A2E1E;}.feel-cool{background:#E8E4DA;color:#4A3410;}
 .feel-cold{background:#D8E4ED;color:#1E2E3A;}
+body.night-mode .feel-great  {background:#2A5A58;color:#A8E8E4;}
+body.night-mode .feel-warm   {background:#5A4A10;color:#F0D080;}
+body.night-mode .feel-tooHot {background:#5A2020;color:#F4A8A8;}
+body.night-mode .feel-cool   {background:#303028;color:#C8C4A8;}
+body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
 
 /* Yesterday prompt */
 .prompt-banner{border-radius:10px;padding:10px 12px;border:0.5px solid var(--primary);display:flex;align-items:center;gap:10px;background:rgba(104,199,193,.1);}
@@ -220,9 +242,8 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 .sheet-body{padding:0 16px;display:flex;flex-direction:column;gap:14px;}
 
 /* Page header */
-.page-header{display:flex;justify-content:space-between;align-items:center;padding:2px 0 6px;flex-shrink:0;}
+.page-header{display:flex;justify-content:space-between;align-items:center;padding:2px 0 4px;flex-shrink:0;}
 .page-title{font-size:28px;font-weight:700;}
-.page-action{background:none;border:none;color:var(--primary);font-size:28px;cursor:pointer;line-height:1;padding:0 4px;}
 
 /* Empty */
 .empty{text-align:center;padding:32px 20px;color:var(--muted);}
@@ -249,39 +270,51 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 
 <!-- TODAY -->
 <div id="screen-today" class="screen active">
-  <div class="page-header"><div class="page-title">Today</div></div>
+  <div id="greeting-row" style="display:none;" class="greeting"></div>
   <div id="yesterday-prompt" style="display:none;"></div>
-
-  <!-- Compact weather card -->
   <div id="wx-card">
     <div id="wx-left">🌤</div>
     <div id="wx-mid">
-      <div id="wx-temp-row">
-        <span id="wx-temp">--°F</span>
-        <span id="wx-hilo"></span>
-      </div>
+      <div id="wx-temp-row"><span id="wx-temp">--°F</span><span id="wx-hilo"></span></div>
       <div id="wx-condition">FETCHING WEATHER...</div>
       <div id="wx-date-loc">Getting location...</div>
     </div>
     <div id="wx-feel">...</div>
   </div>
-
-  <div class="card-title">Suggested outfit</div>
+  <!-- Office day toggle -->
+  <div class="office-row" id="office-row">
+    <div class="office-row-left">
+      <span class="office-icon">💼</span>
+      <div>
+        <div class="office-label">Office day</div>
+        <div class="office-sub" id="office-sub">Suggest work-appropriate outfits</div>
+      </div>
+    </div>
+    <button class="toggle" id="office-toggle" onclick="toggleOfficeMode()"></button>
+  </div>
+  <!-- Outfit header with temp basis -->
+  <div class="outfit-header">
+    <span class="outfit-header-label">Suggested outfit</span>
+    <div class="temp-basis-pills">
+      <button class="tb-pill active" id="tb-current" onclick="setTempBasis('current')">Current</button>
+      <button class="tb-pill" id="tb-high"    onclick="setTempBasis('high')">High</button>
+      <button class="tb-pill" id="tb-low"     onclick="setTempBasis('low')">Low</button>
+    </div>
+  </div>
   <div id="outfit-list"></div>
   <div id="outfit-empty" class="empty" style="display:none;">
     <div class="empty-icon">👕</div>
     <div class="empty-text">Add clothes to your wardrobe to get suggestions.</div>
   </div>
-
   <div class="today-btns" id="outfit-btns" style="display:none;">
     <div class="today-btns-top">
       <button class="btn btn-secondary" onclick="shuffle()">Shuffle</button>
       <button class="btn btn-primary"   onclick="logOutfit()">Wear this ✓</button>
     </div>
-    <button id="btn-log-own" onclick="openManualLog(null,true)">📋 &nbsp;Log my own outfit</button>
+    <button id="btn-log-own" onclick="openManualLog(null,true)">📋 &nbsp;Pick my own outfit</button>
   </div>
-  <div id="no-outfit-log-btn" style="display:none;margin-top:4px;">
-    <button id="btn-log-own-empty" style="background:var(--log-own-bg);color:var(--log-own-color);border:1.5px solid var(--log-own-border);font-size:14px;font-weight:600;width:100%;padding:12px;border-radius:12px;cursor:pointer;" onclick="openManualLog(null,true)">📋 &nbsp;Log today's outfit</button>
+  <div id="no-outfit-log-btn" style="display:none;">
+    <button id="btn-log-own-empty" onclick="openManualLog(null,true)">📋 &nbsp;Pick today's outfit</button>
   </div>
 </div>
 
@@ -289,7 +322,7 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 <div id="screen-wardrobe" class="screen">
   <div class="page-header">
     <div class="page-title">Wardrobe</div>
-    <button class="page-action" onclick="openAddItem()">+</button>
+    <button style="background:none;border:none;color:var(--primary);font-size:28px;cursor:pointer;line-height:1;padding:0 4px;" onclick="openAddItem()">+</button>
   </div>
   <div class="pill-scroll"><div class="pill-row" id="wardrobe-filters"></div></div>
   <div id="wardrobe-list" style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;min-height:0;padding-top:4px;"></div>
@@ -304,6 +337,13 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 <!-- SETTINGS -->
 <div id="screen-settings" class="screen">
   <div class="page-header"><div class="page-title">Settings</div></div>
+  <div class="card">
+    <div class="card-title">Your name</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input class="form-input" id="name-input" type="text" placeholder="Enter your name (optional)" autocorrect="off" style="flex:1;" oninput="saveName()">
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;">Used for the greeting on the Today screen.</div>
+  </div>
   <div class="settings-row" onclick="openBackup()">
     <div><div class="settings-row-title">Backup &amp; Restore</div><div class="settings-row-sub" id="backup-status">Loading...</div></div>
     <div style="color:var(--faint);font-size:18px;">›</div>
@@ -311,6 +351,10 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
   <div class="settings-row" onclick="openArchive()">
     <div><div class="settings-row-title">Archive</div><div class="settings-row-sub" id="archive-count">0 archived items</div></div>
     <div style="color:var(--faint);font-size:18px;">›</div>
+  </div>
+  <div class="settings-row" onclick="openBgColorPicker()">
+    <div><div class="settings-row-title">App background colour</div><div class="settings-row-sub">Customise the background</div></div>
+    <div style="display:flex;align-items:center;gap:8px;"><div id="bg-preview-dot" style="width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);"></div><span style="color:var(--faint);font-size:18px;">›</span></div>
   </div>
   <div class="card" style="margin-top:4px;">
     <div class="card-title">Personal temp offset</div>
@@ -385,10 +429,10 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
         <div class="color-picker-section">
           <div class="color-swatches" id="color-swatches"></div>
           <div class="color-wheel-wrap">
-            <canvas id="color-canvas" width="240" height="240"></canvas>
+            <canvas id="color-canvas" width="220" height="220"></canvas>
             <div class="brightness-row">
               <label>Brightness</label>
-              <input type="range" id="brightness-slider" min="10" max="95" value="75" oninput="onBrightnessChange()">
+              <input type="range" class="brightness-slider" id="brightness-slider" min="10" max="95" value="75" oninput="onBrightnessChange('color-canvas','brightness-slider')">
             </div>
             <div class="color-preview-row">
               <div class="color-preview-dot" id="color-preview-dot" style="background:#A0A0A0;"></div>
@@ -406,10 +450,14 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
           <span class="toggle-label">Weekends</span>
           <button class="toggle on" id="toggle-weekend" onclick="toggleField('weekend')"></button>
         </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Office / work appropriate</span>
+          <button class="toggle on" id="toggle-office" onclick="toggleField('office')"></button>
+        </div>
       </div>
-      <button class="btn btn-primary"   id="item-save-btn"    onclick="saveItem()">Save Item</button>
-      <button class="btn btn-danger"    id="item-archive-btn" onclick="archiveItem()" style="display:none;">Archive Item</button>
-      <button class="btn"               id="item-reset-btn"   onclick="resetWarmth()" style="display:none;background:var(--surface);color:var(--muted);font-size:13px;">Reset warmth to default</button>
+      <button class="btn btn-primary" id="item-save-btn" onclick="saveItem()" style="border:1.5px solid rgba(0,0,0,.08);">Save Item</button>
+      <button class="btn btn-danger"  id="item-archive-btn" onclick="archiveItem()" style="display:none;border:1.5px solid #F4B8A8;">Archive Item</button>
+      <button class="btn btn-outline" id="item-reset-btn"  onclick="resetWarmth()"  style="display:none;font-size:13px;">Reset warmth to default</button>
     </div>
   </div>
 </div>
@@ -445,13 +493,19 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
-      <div class="sheet-title" id="manual-log-title">Log an Outfit</div>
+      <div class="sheet-title" id="manual-log-title">Pick an Outfit</div>
       <button class="sheet-close" onclick="closeSheet('sheet-manual-log')">Cancel</button>
     </div>
     <div class="sheet-body">
-      <div class="form-group">
-        <div class="form-label">Date</div>
-        <input type="date" class="date-select" id="manual-log-date">
+      <div style="display:flex;gap:8px;">
+        <div class="form-group" style="flex:1;">
+          <div class="form-label">Date</div>
+          <input type="date" class="date-select" id="manual-log-date">
+        </div>
+        <div class="form-group" style="flex:0 0 auto;">
+          <div class="form-label">Time (optional)</div>
+          <input type="time" class="date-select" id="manual-log-time" style="width:110px;">
+        </div>
       </div>
       <div class="form-group">
         <div class="form-label">Search items</div>
@@ -462,6 +516,7 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
       </div>
       <div class="pill-scroll"><div class="pill-row" id="manual-filters"></div></div>
       <div id="manual-item-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div id="manual-selection-summary" style="font-size:12px;color:var(--primary);font-weight:600;min-height:16px;"></div>
       <button class="btn btn-primary" onclick="saveManualLog()">Log &amp; Rate Outfit</button>
     </div>
   </div>
@@ -481,7 +536,7 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
         <div id="backup-stats" style="font-size:14px;color:var(--muted);line-height:2;"></div>
       </div>
       <button class="btn btn-primary" onclick="exportBackup()">Export backup file</button>
-      <div style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6;">Saves <strong>stylecast-wardrobe.json</strong> — use this to restore after reinstalling.</div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6;">Saves <strong>stylecast-wardrobe.json</strong> — keep this to restore after reinstalling.</div>
       <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()">Import from file</button>
       <input type="file" id="import-input" accept=".json" style="display:none" onchange="importBackup(this)">
     </div>
@@ -503,6 +558,35 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
   </div>
 </div>
 
+<!-- BG Color Picker Sheet -->
+<div class="sheet-overlay" id="sheet-bg-color">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">App Background</div>
+      <button class="sheet-close" onclick="closeSheet('sheet-bg-color')">Done</button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-label">Quick picks</div>
+      <div class="color-swatches" id="bg-swatches"></div>
+      <div class="form-label">Custom colour</div>
+      <div class="color-wheel-wrap">
+        <canvas id="bg-color-canvas" width="220" height="220"></canvas>
+        <div class="brightness-row">
+          <label>Brightness</label>
+          <input type="range" class="brightness-slider" id="bg-brightness-slider" min="10" max="95" value="85" oninput="onBrightnessChange('bg-color-canvas','bg-brightness-slider')">
+        </div>
+        <div class="color-preview-row">
+          <div class="color-preview-dot" id="bg-color-preview-dot"></div>
+          <span class="color-preview-hex" id="bg-color-preview-hex"></span>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="applyBgColor()">Apply background colour</button>
+      <button class="btn btn-secondary" onclick="resetBgColor()">Reset to default</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm -->
 <div class="confirm-overlay" id="confirm-dialog">
   <div class="confirm-box">
@@ -517,12 +601,13 @@ body.night-mode .badge-dress     {background:#5A3060;color:#D4A8E0;}
 
 <script>
 'use strict';
-
 // ── Data ──────────────────────────────────────────────────────────────────
 const SK='stylecast_v1';
-function loadData(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}return{items:[],logs:[],feedback:[],prefs:{offset:0,feedbackCount:0}};}
+function loadData(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}return{items:[],logs:[],feedback:[],prefs:{offset:0,feedbackCount:0,name:'',bgColor:null}};}
 function saveData(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
 let DB=loadData();
+if(!DB.prefs)DB.prefs={offset:0,feedbackCount:0,name:'',bgColor:null};
+if(!DB.prefs.name)DB.prefs.name='';
 function save(){saveData(DB);}
 function uid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
 
@@ -546,19 +631,72 @@ const SUBS=[
   {key:'socks',      label:'Socks',       cat:'socks',    warmth:1},
   {key:'formalWear', label:'Formal',      cat:'formal',   warmth:3},
 ];
+// Slot order for display
+const SLOT_ORDER=['outerwear','top','bottom','socks','shoes'];
 const CATS={tops:'Tops',outerwear:'Outerwear',bottoms:'Bottoms',shoes:'Shoes',socks:'Socks',formal:'Formal'};
 function subByKey(k){return SUBS.find(s=>s.key===k)||SUBS[1];}
 function badgeCls(item){return item.subcategory==='dress'?'badge-dress':'badge-'+item.category;}
 
-// ── Day / Night mode ──────────────────────────────────────────────────────
+// ── Day / Night ───────────────────────────────────────────────────────────
 function applyTimeOfDay(){
   const h=new Date().getHours();
-  // Night = 8pm (20) to 6am (6)
-  const isNight=(h>=20||h<6);
-  document.body.classList.toggle('night-mode',isNight);
+  document.body.classList.toggle('night-mode',(h>=20||h<6));
 }
 
-// ── Colour picker ─────────────────────────────────────────────────────────
+// ── Greeting ──────────────────────────────────────────────────────────────
+function renderGreeting(){
+  const name=DB.prefs.name||'';
+  const h=new Date().getHours();
+  const period=h<12?'morning':h<17?'afternoon':'evening';
+  const row=document.getElementById('greeting-row');
+  if(name){
+    row.style.display='block';
+    row.innerHTML=`Good ${period}, <strong>${name}</strong>.`;
+  }else{
+    row.style.display='none';
+  }
+}
+
+// ── Office mode ───────────────────────────────────────────────────────────
+let officeModeOn=false;
+function initOfficeMode(){
+  const h=new Date().getHours(),d=new Date().getDay();
+  const isWeekday=(d>=1&&d<=5);
+  const isOfficHours=(h>=4&&(h<9||(h===9&&new Date().getMinutes()<=30)));
+  officeModeOn=isWeekday&&isOfficHours;
+  syncOfficeToggle();
+}
+function toggleOfficeMode(){
+  officeModeOn=!officeModeOn;
+  syncOfficeToggle();
+  generateOutfit();
+}
+function syncOfficeToggle(){
+  const btn=document.getElementById('office-toggle');
+  btn.className='toggle'+(officeModeOn?' on':'');
+  document.getElementById('office-sub').textContent=
+    officeModeOn?'Showing office-appropriate outfits':'Showing casual outfits';
+}
+
+// ── Temp basis ────────────────────────────────────────────────────────────
+let tempBasis='current'; // 'current' | 'high' | 'low'
+function setTempBasis(basis){
+  tempBasis=basis;
+  ['current','high','low'].forEach(b=>{
+    document.getElementById('tb-'+b).classList.toggle('active',b===basis);
+  });
+  // Re-evaluate outfit eligibility without reshuffling
+  generateOutfit(true);
+}
+function getEffectiveTemp(){
+  if(!wxSnapshot)return 65;
+  const base=tempBasis==='high'?(wxSnapshot.hiF??wxSnapshot.tempF):
+             tempBasis==='low' ?(wxSnapshot.loF??wxSnapshot.tempF):
+             wxSnapshot.tempF;
+  return base+(DB.prefs.offset||0);
+}
+
+// ── Colour picker (shared) ────────────────────────────────────────────────
 const SWATCHES=[
   '#FFFFFF','#F5F0E8','#E8E0D0','#D4C5B0','#B8A898','#8C7868',
   '#2C2C2C','#1A1A1A','#4A4A4A','#6B6B6B','#9A9A9A','#C8C8C8',
@@ -568,48 +706,54 @@ const SWATCHES=[
   '#1E8449','#27AE60','#58D68D','#A9DFBF','#0E6655','#76D7C4',
   '#6C3483','#8E44AD','#BB8FCE','#D7BDE2','#4A235A','#E8DAEF',
 ];
+const BG_SWATCHES=[
+  {hex:'#FFEDDD',name:'Warm Cream (default)'},
+  {hex:'#F0EAE0',name:'Linen'},
+  {hex:'#E8EFF5',name:'Morning Mist'},
+  {hex:'#F0EDE8',name:'Parchment'},
+  {hex:'#EAF0EA',name:'Sage Whisper'},
+  {hex:'#F5EAF0',name:'Dusty Rose'},
+  {hex:'#EEE8F5',name:'Lavender Haze'},
+  {hex:'#F5F0E0',name:'Butter'},
+  {hex:'#E8F0EE',name:'Sea Glass'},
+  {hex:'#F0EAE8',name:'Terracotta Blush'},
+];
 let pickedColor='#A0A0A0';
-let brightnessVal=75;
+let pickedBgColor='#FFEDDD';
+let itemBrightnessVal=75;
+let bgBrightnessVal=85;
 
-function initColorPicker(){
-  // Build swatches
+function buildItemSwatches(){
   const wrap=document.getElementById('color-swatches');
-  wrap.innerHTML='';
+  if(!wrap)return;wrap.innerHTML='';
   SWATCHES.forEach(hex=>{
-    const d=document.createElement('div');
-    d.className='color-swatch';
-    d.style.background=hex;
+    const d=document.createElement('div');d.className='color-swatch';d.style.background=hex;
     if(hex==='#FFFFFF')d.style.borderColor='#ccc';
-    d.addEventListener('click',()=>{
-      pickedColor=hex;
-      syncColorPreview();
-      wrap.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
-      d.classList.add('selected');
-    });
+    d.addEventListener('click',()=>{pickedColor=hex;syncItemColorPreview();wrap.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');});
     wrap.appendChild(d);
   });
-  drawColorWheel();
-  syncColorPreview();
-  const canvas=document.getElementById('color-canvas');
-  canvas.addEventListener('click',pickFromCanvas);
-  canvas.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e);},{passive:false});
+}
+function buildBgSwatches(){
+  const wrap=document.getElementById('bg-swatches');if(!wrap)return;wrap.innerHTML='';
+  BG_SWATCHES.forEach(({hex,name})=>{
+    const d=document.createElement('div');d.className='bg-swatch color-swatch';d.style.background=hex;d.title=name;
+    if(hex==='#FFFFFF'||hex==='#F5F0E8')d.style.borderColor='#ccc';
+    d.addEventListener('click',()=>{pickedBgColor=hex;syncBgColorPreview();wrap.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');});
+    wrap.appendChild(d);
+  });
 }
 
-function drawColorWheel(){
-  const canvas=document.getElementById('color-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const size=canvas.width;
-  const cx=size/2,cy=size/2,r=size/2-2;
-  const L=brightnessVal;
-  ctx.clearRect(0,0,size,size);
-  for(let angle=0;angle<360;angle++){
-    const s=angle*Math.PI/180;
-    const e=(angle+2)*Math.PI/180;
+function rgbToHex(r,g,b){return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
+
+function drawColorWheel(canvasId,brightness){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  const ctx=canvas.getContext('2d'),sz=canvas.width,cx=sz/2,cy=sz/2,r=sz/2-2;
+  ctx.clearRect(0,0,sz,sz);
+  for(let a=0;a<360;a++){
     const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
-    grad.addColorStop(0,`hsl(${angle},0%,${L}%)`);
-    grad.addColorStop(1,`hsl(${angle},100%,${L/2}%)`);
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);ctx.closePath();
+    grad.addColorStop(0,`hsl(${a},0%,${brightness}%)`);
+    grad.addColorStop(1,`hsl(${a},100%,${brightness/2}%)`);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a*Math.PI/180,(a+2)*Math.PI/180);ctx.closePath();
     ctx.fillStyle=grad;ctx.fill();
   }
   ctx.globalCompositeOperation='destination-in';
@@ -617,31 +761,58 @@ function drawColorWheel(){
   ctx.globalCompositeOperation='source-over';
 }
 
-function rgbToHex(r,g,b){return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
-
-function pickFromCanvas(e){
-  const canvas=document.getElementById('color-canvas');
+function pickFromCanvas(e,canvasId,isBg){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
   const rect=canvas.getBoundingClientRect();
   const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
   const cx=e.touches?e.touches[0].clientX:e.clientX;
   const cy=e.touches?e.touches[0].clientY:e.clientY;
-  const x=Math.round((cx-rect.left)*sx);
-  const y=Math.round((cy-rect.top)*sy);
+  const x=Math.round((cx-rect.left)*sx),y=Math.round((cy-rect.top)*sy);
   const px=canvas.getContext('2d').getImageData(x,y,1,1).data;
   if(px[3]<10)return;
-  pickedColor=rgbToHex(px[0],px[1],px[2]);
-  document.getElementById('color-swatches').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
-  syncColorPreview();
+  const hex=rgbToHex(px[0],px[1],px[2]);
+  if(isBg){pickedBgColor=hex;syncBgColorPreview();}
+  else{pickedColor=hex;syncItemColorPreview();document.getElementById('color-swatches').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));}
 }
 
-function syncColorPreview(){
+function onBrightnessChange(canvasId,sliderId){
+  const v=parseInt(document.getElementById(sliderId).value);
+  if(canvasId==='color-canvas')itemBrightnessVal=v;else bgBrightnessVal=v;
+  drawColorWheel(canvasId,v);
+}
+function syncItemColorPreview(){
   document.getElementById('color-preview-dot').style.background=pickedColor;
   document.getElementById('color-preview-hex').textContent=pickedColor.toUpperCase();
 }
-
-function onBrightnessChange(){
-  brightnessVal=parseInt(document.getElementById('brightness-slider').value);
-  drawColorWheel();
+function syncBgColorPreview(){
+  document.getElementById('bg-color-preview-dot').style.background=pickedBgColor;
+  document.getElementById('bg-color-preview-hex').textContent=pickedBgColor.toUpperCase();
+}
+function initColorPicker(){
+  buildItemSwatches();
+  drawColorWheel('color-canvas',itemBrightnessVal);syncItemColorPreview();
+  const c=document.getElementById('color-canvas');
+  if(c){c.addEventListener('click',e=>pickFromCanvas(e,'color-canvas',false));c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'color-canvas',false);},{passive:false});}
+}
+function openBgColorPicker(){
+  buildBgSwatches();
+  pickedBgColor=DB.prefs.bgColor||'#FFEDDD';
+  drawColorWheel('bg-color-canvas',bgBrightnessVal);syncBgColorPreview();
+  const c=document.getElementById('bg-color-canvas');
+  if(c){c.addEventListener('click',e=>pickFromCanvas(e,'bg-color-canvas',true));c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'bg-color-canvas',true);},{passive:false});}
+  document.getElementById('sheet-bg-color').classList.add('open');
+}
+function applyBgColor(){
+  DB.prefs.bgColor=pickedBgColor;save();
+  document.documentElement.style.setProperty('--bg',pickedBgColor);
+  document.getElementById('bg-preview-dot').style.background=pickedBgColor;
+  closeSheet('sheet-bg-color');
+}
+function resetBgColor(){
+  DB.prefs.bgColor=null;save();
+  document.documentElement.style.removeProperty('--bg');
+  document.getElementById('bg-preview-dot').style.background='var(--bg)';
+  closeSheet('sheet-bg-color');
 }
 
 // ── Weather ───────────────────────────────────────────────────────────────
@@ -665,13 +836,11 @@ const FEEL={
 };
 function getFeel(t){const a=t+(DB.prefs.offset||0);if(a>=85)return'hot';if(a>=72)return'warm';if(a>=60)return'comfortable';if(a>=48)return'cool';if(a>=35)return'cold';return'veryCold';}
 function mapWMO(c){if(c<=1)return'sunny';if(c===2)return'partlyCloudy';if(c===3)return'cloudy';if(c===45||c===48)return'fog';if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(c))return'rain';if([71,73,75,77,85,86].includes(c))return'snow';if([95,96,99].includes(c))return'storm';return'partlyCloudy';}
-
 async function fetchWeather(lat,lon){
   const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&forecast_days=1&timezone=auto`;
   const d=await(await fetch(u)).json();
   return{tempF:d.current.temperature_2m,hiF:d.daily.temperature_2m_max[0],loF:d.daily.temperature_2m_min[0],condition:mapWMO(d.current.weather_code)};
 }
-
 function initWeather(){
   if(!navigator.geolocation){updateWxCard(null);return;}
   navigator.geolocation.getCurrentPosition(async pos=>{
@@ -679,7 +848,6 @@ function initWeather(){
     catch(e){updateWxCard(null);}
   },()=>updateWxCard(null));
 }
-
 function updateWxCard(wx){
   const isNight=document.body.classList.contains('night-mode');
   const card=document.getElementById('wx-card');
@@ -695,72 +863,106 @@ function updateWxCard(wx){
   }
   const cfg=WX[wx.condition]||WX.partlyCloudy;
   const feel=getFeel(wx.tempF);const fc=FEEL[feel];
-  const cardBg=isNight?(cfg.bgN||'#2A1F3D'):cfg.bg;
-
-  card.style.background=cardBg;
+  card.style.background=isNight?(cfg.bgN||'#2A1F3D'):cfg.bg;
   card.style.borderColor=fc.border;
   card.style.color=isNight?'#EDE8F5':cfg.tc;
-
   document.getElementById('wx-left').textContent=cfg.icon;
   document.getElementById('wx-temp').textContent=Math.round(wx.tempF)+'°F';
   document.getElementById('wx-hilo').textContent=wx.hiF!=null?`H:${Math.round(wx.hiF)}° L:${Math.round(wx.loF)}°`:'';
   document.getElementById('wx-condition').textContent=cfg.label.toUpperCase();
-
-  // Full date: Friday, April 3rd 2026
-  const now=new Date();
-  const dayName=now.toLocaleDateString('en-US',{weekday:'long'});
-  const month=now.toLocaleDateString('en-US',{month:'long'});
-  const day=now.getDate();
-  const year=now.getFullYear();
-  const suffix=['th','st','nd','rd'][Math.min(day%10,3)]||'th';
-  const exc=[11,12,13];
-  const s=exc.includes(day%100)?'th':suffix;
-  document.getElementById('wx-date-loc').textContent=`${dayName}, ${month} ${day}${s} ${year}`;
-
+  const now=new Date(),day=now.getDate(),d2=day%10,exc=[11,12,13];
+  const sfx=exc.includes(day%100)?'th':(['th','st','nd','rd'][Math.min(d2,3)]||'th');
+  document.getElementById('wx-date-loc').textContent=`${now.toLocaleDateString('en-US',{weekday:'long'})}, ${now.toLocaleDateString('en-US',{month:'long'})} ${day}${sfx} ${now.getFullYear()}`;
   const feelEl=document.getElementById('wx-feel');
-  feelEl.textContent=fc.label;feelEl.style.background=fc.bg;feelEl.style.color=fc.color;
+  feelEl.textContent=fc.label;
+  if(isNight){const np={hot:{bg:'rgba(200,80,40,.35)',color:'#F4A888'},warm:{bg:'rgba(200,160,40,.3)',color:'#F0D080'},comfortable:{bg:'rgba(60,160,155,.3)',color:'#80E0DA'},cool:{bg:'rgba(80,140,140,.28)',color:'#A0D8D8'},cold:{bg:'rgba(60,100,160,.3)',color:'#A8C8F0'},veryCold:{bg:'rgba(50,80,130,.3)',color:'#90B0E0'}}[feel]||{bg:'rgba(60,160,155,.3)',color:'#80E0DA'};feelEl.style.background=np.bg;feelEl.style.color=np.color;}
+  else{feelEl.style.background=fc.bg;feelEl.style.color=fc.color;}
 }
 
 // ── Outfit engine ─────────────────────────────────────────────────────────
+// currentOutfit: { outerwear, top, bottom, socks, shoes }
+// 'top' slot = shirt layer (ALWAYS filled unless dress is chosen)
+// 'outerwear' = hoodie/jacket/coat layered OVER the top
 let currentOutfit={};let lockedSlots={};let usedIDs=[];
-function warmthMin(t){if(t>=75)return 1;if(t>=60)return 1;if(t>=45)return 2;return 3;}
+function warmthMin(t){return t>=75?1:t>=60?1:t>=45?2:3;}
 
-function generateOutfit(){
-  const tempF=wxSnapshot?wxSnapshot.tempF+(DB.prefs.offset||0):65;
-  const isWknd=[0,6].includes(new Date().getDay());const ago3=Date.now()-3*86400000;
-  const pool=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions);
+function generateOutfit(preserveItems){
+  const tempF=getEffectiveTemp();
+  const isWknd=[0,6].includes(new Date().getDay());
+  const ago3=Date.now()-3*86400000;
+  let pool=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions);
+
+  // Office mode filter
+  if(officeModeOn){
+    pool=pool.filter(i=>i.officeOk!==false);
+  }else{
+    // When NOT office mode, exclude items that are office-ONLY
+    // (officeOk:true but weekdayOk/weekendOk might suggest them anyway — we just don't exclude)
+  }
+
   function score(i){let s=100+Math.random()*15;if(isWknd&&i.weekendOk)s+=20;if(!isWknd&&i.weekdayOk)s+=20;if(i.lastWorn&&new Date(i.lastWorn).getTime()>ago3)s-=40;return s;}
   function best(arr){
+    if(preserveItems){return arr.sort((a,b)=>score(b)-score(a))[0]||null;}
     const ex=new Set(usedIDs);const c=arr.filter(i=>!ex.has(i.id));
     if(!c.length){arr.forEach(i=>{usedIDs=usedIDs.filter(id=>id!==i.id);});return arr.sort((a,b)=>score(b)-score(a))[0]||null;}
     return c.sort((a,b)=>score(b)-score(a))[0]||null;
   }
-  const tops=pool.filter(i=>i.category==='tops').filter(i=>{
+
+  // Tops (shirt layer — always suggest unless dress)
+  const topPool=pool.filter(i=>i.category==='tops').filter(i=>{
+    if(i.subcategory==='dress')return false; // dresses handled separately
     if(i.subcategory==='tankTop')return tempF>=70;
-    if(i.subcategory==='shortSleeve'||i.subcategory==='dress')return tempF>=55;
-    if(i.subcategory==='longSleeve')return tempF<75;return true;
+    if(i.subcategory==='shortSleeve')return tempF>=55;
+    if(i.subcategory==='longSleeve')return true; // always valid as base layer
+    return true;
   });
+  // Dresses (replace top+bottom combo)
+  const dressPool=pool.filter(i=>i.subcategory==='dress').filter(()=>tempF>=50);
+
+  // Outerwear (layered ON TOP of shirt — only when cold)
   const outerPool=tempF<65?pool.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF)):[];
+
   const botPool=pool.filter(i=>i.category==='bottoms').filter(i=>i.subcategory==='shorts'?tempF>=65:true);
   const shoePool=pool.filter(i=>i.category==='shoes');
   const sockPool=pool.filter(i=>i.category==='socks');
+
   const newO={};
-  newO.top=lockedSlots.top?currentOutfit.top:best(tops);
+
+  // Decide if we're suggesting a dress or a top+bottom combo
+  // Prefer dress only if no top or only tops are equally scored — bias toward shirts
+  const bestTop=best([...topPool]);
+  const bestDress=best([...dressPool]);
+
+  if(!bestTop&&bestDress){
+    // No shirts available, use dress
+    newO.top=lockedSlots.top?currentOutfit.top:bestDress;
+  }else{
+    newO.top=lockedSlots.top?currentOutfit.top:bestTop;
+  }
+
+  const isDress=(newO.top?.subcategory==='dress');
+
+  // Outerwear — separate slot, layered over shirt
   newO.outerwear=lockedSlots.outerwear?currentOutfit.outerwear:(outerPool.length?best(outerPool):null);
-  newO.bottom=lockedSlots.bottom?currentOutfit.bottom:(newO.top?.subcategory==='dress'?null:best(botPool));
+  // Bottom — skip if dress
+  newO.bottom=lockedSlots.bottom?currentOutfit.bottom:(isDress?null:best(botPool));
+  // Shoes
   const shoe=lockedSlots.shoes?currentOutfit.shoes:best(shoePool);newO.shoes=shoe;
+  // Socks — skip if sandals
   newO.socks=lockedSlots.socks?currentOutfit.socks:(shoe?.subcategory==='sandals'?null:(sockPool.length?best(sockPool):null));
+
   currentOutfit=newO;renderOutfit();
 }
 
 function shuffle(){
+  // Push current unlocked items to usedIDs
   Object.entries(currentOutfit).forEach(([sl,item])=>{if(item&&!lockedSlots[sl])usedIDs.push(item.id);});
   const pool=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions);
   ['tops','outerwear','bottoms','shoes','socks'].forEach(cat=>{
     const ci=pool.filter(i=>i.category===cat);
     if(ci.length&&ci.every(i=>usedIDs.includes(i.id)))ci.forEach(i=>{usedIDs=usedIDs.filter(id=>id!==i.id);});
   });
-  generateOutfit();
+  generateOutfit(false);
 }
 
 function renderOutfit(){
@@ -769,14 +971,12 @@ function renderOutfit(){
   const btns=document.getElementById('outfit-btns');
   const noLog=document.getElementById('no-outfit-log-btn');
   list.innerHTML='';
-  const pieces=['top','outerwear','bottom','shoes','socks'].map(s=>({slot:s,item:currentOutfit[s]})).filter(p=>p.item);
+  const pieces=SLOT_ORDER.map(s=>({slot:s,item:currentOutfit[s]})).filter(p=>p.item);
   if(!pieces.length){empty.style.display='flex';empty.style.flexDirection='column';btns.style.display='none';noLog.style.display='block';return;}
   empty.style.display='none';btns.style.display='block';noLog.style.display='none';
   pieces.forEach(({slot,item})=>{
     const sub=subByKey(item.subcategory);const cls=badgeCls(item);const locked=!!lockedSlots[slot];
-    const lockSVG=locked
-      ?'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>'
-      :'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/>';
+    const lockSVG=locked?'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>':'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/>';
     const blob=item.color?`<span class="color-blob" style="background:${item.color};"></span>`:'';
     const div=document.createElement('div');div.className='outfit-item';
     div.innerHTML=`<button class="lock-btn${locked?' locked':''}" onclick="toggleLock('${slot}')" aria-label="${locked?'Unlock':'Lock'}"><svg viewBox="0 0 24 24">${lockSVG}</svg></button><span class="outfit-item-name">${item.name}</span><span class="badge ${cls}">${sub.label}</span>${blob}`;
@@ -787,12 +987,21 @@ function renderOutfit(){
 function toggleLock(slot){if(lockedSlots[slot])delete lockedSlots[slot];else lockedSlots[slot]=true;renderOutfit();}
 
 function logOutfit(){
-  const pieces=['top','outerwear','bottom','shoes','socks'].map(s=>currentOutfit[s]).filter(Boolean);
-  if(!pieces.length)return;_doLog(pieces,new Date().toISOString());
+  const pieces=SLOT_ORDER.map(s=>currentOutfit[s]).filter(Boolean);
+  if(!pieces.length)return;_doLog(pieces,new Date().toISOString(),false);
 }
 
-function _doLog(pieces,dateISO){
-  const log={id:uid(),date:dateISO,itemIDs:pieces.map(i=>i.id),itemNames:pieces.map(i=>i.name).join(', '),tempF:wxSnapshot?Math.round(wxSnapshot.tempF):null,condition:wxSnapshot?.condition||null,overallFeel:null,itemRatings:{}};
+// dateISO: ISO string, isRetroactive: bool (no current weather attached)
+function _doLog(pieces,dateISO,isRetroactive){
+  const log={
+    id:uid(),date:dateISO,
+    itemIDs:pieces.map(i=>i.id),itemNames:pieces.map(i=>i.name).join(', '),
+    tempF:(!isRetroactive&&wxSnapshot)?Math.round(wxSnapshot.tempF):null,
+    hiF:wxSnapshot?Math.round(wxSnapshot.hiF??wxSnapshot.tempF):null,
+    loF:wxSnapshot?Math.round(wxSnapshot.loF??wxSnapshot.tempF):null,
+    condition:(!isRetroactive&&wxSnapshot)?wxSnapshot.condition:null,
+    overallFeel:null,itemRatings:{},isRetroactive:isRetroactive||false,
+  };
   DB.logs.unshift(log);DB.logs.sort((a,b)=>new Date(b.date)-new Date(a.date));
   pieces.forEach(i=>{i.lastWorn=dateISO;i.timesWorn=(i.timesWorn||0)+1;});
   save();openFeedback(log,pieces);renderHistory();
@@ -808,24 +1017,29 @@ function checkYesterdayPrompt(){
   if(!hasLog&&!dismissed){
     prompt.style.display='block';
     const yLabel=yest.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
-    prompt.innerHTML=`<div class="prompt-banner"><div class="prompt-icon">📅</div><div class="prompt-text" onclick="openManualLog('${yStr}')"><strong>Missing yesterday</strong><br>No outfit logged for ${yLabel}. Tap to add one.</div><button class="prompt-close" onclick="dismissYest(event)">×</button></div>`;
+    prompt.innerHTML=`<div class="prompt-banner"><div class="prompt-icon">📅</div><div class="prompt-text" onclick="openManualLog('${yStr}')"><strong>Missing yesterday</strong><br>No outfit logged for ${yLabel}. Tap to add.</div><button class="prompt-close" onclick="dismissYest(event)">×</button></div>`;
   }else{prompt.style.display='none';}
 }
 function dismissYest(e){e.stopPropagation();sessionStorage.setItem('yest_dismissed','1');document.getElementById('yesterday-prompt').style.display='none';}
 
 // ── Manual log ────────────────────────────────────────────────────────────
+// One item per category (radio behaviour per category, except shoes allows 1 and socks allows 1)
 let manualCatFilter='all';
+let selectedManualItems={};  // { category: itemId } — one per category
+
 function openManualLog(presetDate,forToday){
   const today=new Date().toISOString().slice(0,10);
-  const di=document.getElementById('manual-log-date');
-  di.value=presetDate||today;di.max=today;
-  manualCatFilter='all';
+  document.getElementById('manual-log-date').value=presetDate||today;
+  document.getElementById('manual-log-date').max=today;
+  document.getElementById('manual-log-time').value='';
+  manualCatFilter='all';selectedManualItems={};
   document.getElementById('manual-search').value='';
-  buildManualFilters();renderManualItems();
+  buildManualFilters();renderManualItems();updateManualSummary();
   document.getElementById('manual-log-title').textContent=
-    presetDate?"Log Yesterday's Outfit":forToday?"Log Today's Outfit":"Log an Outfit";
+    presetDate?"Log Yesterday's Outfit":forToday?"Pick Today's Outfit":"Pick an Outfit";
   document.getElementById('sheet-manual-log').classList.add('open');
 }
+
 function buildManualFilters(){
   const row=document.getElementById('manual-filters');row.innerHTML='';
   ['all',...Object.keys(CATS)].forEach(cat=>{
@@ -836,32 +1050,63 @@ function buildManualFilters(){
     row.appendChild(btn);
   });
 }
+
 function renderManualItems(){
   const q=(document.getElementById('manual-search').value||'').toLowerCase().trim();
   const container=document.getElementById('manual-item-list');container.innerHTML='';
-  const active=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions).filter(i=>{
-    if(manualCatFilter!=='all'&&i.category!==manualCatFilter)return false;
-    if(q&&!i.name.toLowerCase().includes(q))return false;
-    return true;
+  const cats=manualCatFilter==='all'?Object.keys(CATS):[manualCatFilter];
+  let anyItems=false;
+  cats.forEach(cat=>{
+    const items=DB.items.filter(i=>{
+      if(i.isArchived||i.excludeFromSuggestions)return false;
+      if(i.category!==cat)return false;
+      if(q&&!i.name.toLowerCase().includes(q))return false;
+      return true;
+    });
+    if(!items.length)return;
+    anyItems=true;
+    if(manualCatFilter==='all'){
+      const header=document.createElement('div');header.className='manual-cat-header';
+      header.textContent=CATS[cat]||cat;container.appendChild(header);
+    }
+    items.forEach(item=>{
+      const sub=subByKey(item.subcategory);const cls=badgeCls(item);
+      const isSelected=selectedManualItems[cat]===item.id;
+      const blob=item.color?`<span class="color-blob" style="background:${item.color};margin-left:4px;"></span>`:'';
+      const row=document.createElement('div');
+      row.className='manual-log-item'+(isSelected?' selected-item':'');
+      row.innerHTML=`<div class="manual-radio${isSelected?' checked':''}"></div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${item.name}</div><div style="font-size:12px;color:var(--muted);">${sub.label}</div></div><span class="badge ${cls}">${sub.label}</span>${blob}`;
+      row.onclick=()=>{
+        // Toggle: click again to deselect
+        if(selectedManualItems[cat]===item.id)delete selectedManualItems[cat];
+        else selectedManualItems[cat]=item.id;
+        renderManualItems();updateManualSummary();
+      };
+      container.appendChild(row);
+    });
   });
-  if(!active.length){container.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">No items match.</div>';return;}
-  active.forEach(item=>{
-    const sub=subByKey(item.subcategory);const cls=badgeCls(item);
-    const blob=item.color?`<span class="color-blob" style="background:${item.color};margin-left:4px;"></span>`:'';
-    const lbl=document.createElement('label');
-    lbl.style.cssText='display:flex;align-items:center;gap:12px;background:var(--card);border-radius:10px;padding:12px 14px;border:0.5px solid var(--border);cursor:pointer;transition:background .4s;';
-    lbl.innerHTML=`<input type="checkbox" id="ml-${item.id}" value="${item.id}" style="width:20px;height:20px;accent-color:var(--primary);flex-shrink:0;"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${item.name}</div><div style="font-size:12px;color:var(--muted);">${sub.label}</div></div><span class="badge ${cls}">${sub.label}</span>${blob}`;
-    container.appendChild(lbl);
-  });
+  if(!anyItems)container.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">No items match.</div>';
 }
+
+function updateManualSummary(){
+  const ids=Object.values(selectedManualItems);
+  const names=ids.map(id=>{const item=DB.items.find(i=>i.id===id);return item?item.name:'';}).filter(Boolean);
+  document.getElementById('manual-selection-summary').textContent=
+    names.length?`Selected: ${names.join(', ')}`:'';
+}
+
 function saveManualLog(){
   const dateVal=document.getElementById('manual-log-date').value;
   if(!dateVal){alert('Please select a date.');return;}
-  const checked=[...document.querySelectorAll('#manual-item-list input:checked')].map(c=>c.value);
-  if(!checked.length){alert('Select at least one item.');return;}
-  const pieces=DB.items.filter(i=>checked.includes(i.id));
+  const ids=Object.values(selectedManualItems);
+  if(!ids.length){alert('Select at least one item.');return;}
+  const pieces=DB.items.filter(i=>ids.includes(i.id));
+  const timeVal=document.getElementById('manual-log-time').value;
+  const isoStr=timeVal?new Date(dateVal+'T'+timeVal+':00').toISOString():new Date(dateVal+'T12:00:00').toISOString();
+  // Is it today?
+  const isToday=dateVal===new Date().toISOString().slice(0,10);
   closeSheet('sheet-manual-log');
-  _doLog(pieces,new Date(dateVal+'T12:00:00').toISOString());
+  _doLog(pieces,isoStr,!isToday);
 }
 
 // ── Feedback ──────────────────────────────────────────────────────────────
@@ -869,11 +1114,7 @@ let feedbackLog=null,feedbackItems=[],itemRatings={},overallFeel=null;
 function openFeedback(log,items){
   feedbackLog=log;feedbackItems=items;itemRatings={};overallFeel=null;
   const c=document.getElementById('feedback-items');c.innerHTML='';
-  items.forEach(item=>{
-    const b=document.createElement('div');b.className='feedback-block';
-    b.innerHTML=`<div class="feedback-item-name">${item.name}</div><div class="rating-row"><button class="rating-btn rb-hot" onclick="setRating('${item.id}','tooHot',this)">Too hot</button><button class="rating-btn rb-warm" onclick="setRating('${item.id}','warm',this)">Warm</button><button class="rating-btn rb-ok" onclick="setRating('${item.id}','justRight',this)">Just right</button><button class="rating-btn rb-cool" onclick="setRating('${item.id}','cool',this)">Cool</button><button class="rating-btn rb-cold" onclick="setRating('${item.id}','tooCold',this)">Cold</button></div>`;
-    c.appendChild(b);
-  });
+  items.forEach(item=>{const b=document.createElement('div');b.className='feedback-block';b.innerHTML=`<div class="feedback-item-name">${item.name}</div><div class="rating-row"><button class="rating-btn rb-hot" onclick="setRating('${item.id}','tooHot',this)">Too hot</button><button class="rating-btn rb-warm" onclick="setRating('${item.id}','warm',this)">Warm</button><button class="rating-btn rb-ok" onclick="setRating('${item.id}','justRight',this)">Just right</button><button class="rating-btn rb-cool" onclick="setRating('${item.id}','cool',this)">Cool</button><button class="rating-btn rb-cold" onclick="setRating('${item.id}','tooCold',this)">Cold</button></div>`;c.appendChild(b);});
   ['tooHot','warm','great','cool','cold'].forEach(k=>document.getElementById('ov-'+k).classList.remove('selected'));
   document.getElementById('sheet-feedback').classList.add('open');
 }
@@ -893,8 +1134,7 @@ let wardrobeFilter='all';
 function renderWardrobe(){
   const pillRow=document.getElementById('wardrobe-filters');pillRow.innerHTML='';
   ['all',...Object.keys(CATS)].forEach(cat=>{
-    const btn=document.createElement('button');
-    btn.className='pill'+(wardrobeFilter===cat?' active':'');
+    const btn=document.createElement('button');btn.className='pill'+(wardrobeFilter===cat?' active':'');
     btn.textContent=cat==='all'?'All':CATS[cat];
     btn.onclick=()=>{wardrobeFilter=cat;renderWardrobe();};
     pillRow.appendChild(btn);
@@ -905,8 +1145,9 @@ function renderWardrobe(){
   items.forEach(item=>{
     const sub=subByKey(item.subcategory);const cls=badgeCls(item);
     const blob=item.color?`<span class="color-blob" style="background:${item.color};"></span>`:'';
+    const officeDot=item.officeOk!==false?'<span style="font-size:11px;margin-left:3px;">💼</span>':'';
     const div=document.createElement('div');div.className='list-item';
-    div.innerHTML=`<div><div class="item-name">${item.name}</div><div class="item-sub">${sub.label}</div></div><div class="item-right"><span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
+    div.innerHTML=`<div><div class="item-name">${item.name}${officeDot}</div><div class="item-sub">${sub.label}</div></div><div class="item-right"><span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
     div.onclick=()=>openEditItem(item);list.appendChild(div);
   });
 }
@@ -922,9 +1163,11 @@ function openAddItem(){
   document.getElementById('item-reset-btn').style.display='none';
   document.getElementById('toggle-weekday').className='toggle on';
   document.getElementById('toggle-weekend').className='toggle on';
-  pickedColor='#A0A0A0';brightnessVal=75;
+  document.getElementById('toggle-office').className='toggle on';
+  pickedColor='#A0A0A0';itemBrightnessVal=75;
   document.getElementById('brightness-slider').value=75;
-  buildTypeGrid(null);selectWarmth(2);drawColorWheel();syncColorPreview();
+  buildTypeGrid(null);selectWarmth(2);
+  drawColorWheel('color-canvas',75);syncItemColorPreview();
   document.getElementById('color-swatches').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
   document.getElementById('sheet-item').classList.add('open');
 }
@@ -937,25 +1180,16 @@ function openEditItem(item){
   document.getElementById('item-reset-btn').style.display='block';
   document.getElementById('toggle-weekday').className='toggle'+(item.weekdayOk?' on':'');
   document.getElementById('toggle-weekend').className='toggle'+(item.weekendOk?' on':'');
-  pickedColor=item.color||'#A0A0A0';brightnessVal=75;
+  document.getElementById('toggle-office').className='toggle'+(item.officeOk!==false?' on':'');
+  pickedColor=item.color||'#A0A0A0';itemBrightnessVal=75;
   document.getElementById('brightness-slider').value=75;
   buildTypeGrid(item.subcategory);selectWarmth(Math.round(item.effectiveWarmth||item.warmth||2));
-  drawColorWheel();syncColorPreview();
-  // Try to highlight matching swatch
-  const swatches=document.getElementById('color-swatches').querySelectorAll('.color-swatch');
-  swatches.forEach(s=>{s.classList.toggle('selected',s.style.backgroundColor&&rgbToHex(...(s.style.backgroundColor.match(/\d+/g)||[]).slice(0,3).map(Number))===pickedColor.toLowerCase());});
+  drawColorWheel('color-canvas',75);syncItemColorPreview();
   document.getElementById('sheet-item').classList.add('open');
 }
 function buildTypeGrid(sel){
-  selectedSubcategory=sel||'shortSleeve';
-  const g=document.getElementById('type-grid');g.innerHTML='';
-  SUBS.forEach(sub=>{
-    const btn=document.createElement('button');
-    btn.className='type-chip'+(sub.key===selectedSubcategory?' selected':'');
-    btn.textContent=sub.label;
-    btn.onclick=()=>{selectedSubcategory=sub.key;g.querySelectorAll('.type-chip').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');if(!editingItem)selectWarmth(sub.warmth);};
-    g.appendChild(btn);
-  });
+  selectedSubcategory=sel||'shortSleeve';const g=document.getElementById('type-grid');g.innerHTML='';
+  SUBS.forEach(sub=>{const btn=document.createElement('button');btn.className='type-chip'+(sub.key===selectedSubcategory?' selected':'');btn.textContent=sub.label;btn.onclick=()=>{selectedSubcategory=sub.key;g.querySelectorAll('.type-chip').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');if(!editingItem)selectWarmth(sub.warmth);};g.appendChild(btn);});
 }
 function selectWarmth(n){selectedWarmth=n;document.getElementById('warmth-row').querySelectorAll('.warmth-btn').forEach((b,i)=>b.classList.toggle('selected',i+1===n));}
 function toggleField(f){document.getElementById('toggle-'+f).classList.toggle('on');}
@@ -964,13 +1198,14 @@ function saveItem(){
   const sub=subByKey(selectedSubcategory);
   const wd=document.getElementById('toggle-weekday').classList.contains('on');
   const we=document.getElementById('toggle-weekend').classList.contains('on');
+  const off=document.getElementById('toggle-office').classList.contains('on');
   if(editingItem){
     editingItem.name=name;editingItem.subcategory=selectedSubcategory;editingItem.category=sub.cat;
     editingItem.effectiveWarmth=selectedWarmth;editingItem.weekdayOk=wd;editingItem.weekendOk=we;
-    editingItem.excludeFromSuggestions=sub.cat==='formal';editingItem.color=pickedColor;
+    editingItem.officeOk=off;editingItem.excludeFromSuggestions=sub.cat==='formal';editingItem.color=pickedColor;
   }else{
     DB.items.push({id:uid(),name,subcategory:selectedSubcategory,category:sub.cat,warmth:sub.warmth,
-      effectiveWarmth:selectedWarmth,baseWarmth:sub.warmth,weekdayOk:wd,weekendOk:we,
+      effectiveWarmth:selectedWarmth,baseWarmth:sub.warmth,weekdayOk:wd,weekendOk:we,officeOk:off,
       excludeFromSuggestions:sub.cat==='formal',isArchived:false,lastWorn:null,timesWorn:0,
       feedbackCount:0,dateAdded:new Date().toISOString(),color:pickedColor});
   }
@@ -995,33 +1230,50 @@ function renderHistory(){
   const list=document.getElementById('history-list');list.innerHTML='';
   if(!DB.logs.length){list.innerHTML='<div class="empty"><div class="empty-icon">🕐</div><div class="empty-text">No history yet. Log an outfit from the Today tab.</div></div>';return;}
   DB.logs.forEach((log,idx)=>{
-    const date=new Date(log.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    const d=new Date(log.date);
+    const dateStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    const timeStr=log.isRetroactive?'':(': '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));
     const feelMap={tooHot:'Too hot',warm:'Warm',great:'Great',cool:'Cool',cold:'Cold'};
-    const feelHTML=log.overallFeel?`<span class="log-feel feel-${log.overallFeel}">${feelMap[log.overallFeel]||log.overallFeel}</span>`:'';
-    const cond=log.condition?(WX[log.condition]?.label||''):'';
+    const feelHTML=log.overallFeel?`<span class="log-feel feel-${log.overallFeel}">${feelMap[log.overallFeel]}</span>`:'';
+    // Weather: retroactive shows H/L only, live shows current temp
+    let metaStr='';
+    if(log.isRetroactive){
+      if(log.hiF!=null)metaStr=`H:${log.hiF}° L:${log.loF}°`;
+    }else if(log.tempF!=null){
+      metaStr=log.tempF+'°F'+(log.condition?(` · ${WX[log.condition]?.label||''}`):'' );
+    }
     const outer=document.createElement('div');outer.className='log-row';
     outer.innerHTML='<div class="log-delete-bg">Delete</div>';
     const inner=document.createElement('div');inner.className='log-inner';
-    inner.innerHTML=`<div class="log-date">${date}</div><div class="log-items">${log.itemNames}</div><div class="log-meta">${log.tempF?log.tempF+'°F · ':''}${cond}</div>${feelHTML}`;
+    inner.innerHTML=`<div class="log-date">${dateStr}${timeStr}${log.isRetroactive?' <span style="font-size:10px;opacity:.6;">(retroactive)</span>':''}</div><div class="log-items">${log.itemNames}</div>${metaStr?`<div class="log-meta">${metaStr}</div>`:''}${feelHTML}`;
     outer.appendChild(inner);
     let sx=0,cx=0,sw=false;
     inner.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sw=false;},{passive:true});
-    inner.addEventListener('touchmove',e=>{cx=e.touches[0].clientX;const d=sx-cx;if(d>10)sw=true;if(sw)inner.style.transform=`translateX(${Math.min(0,-d)}px)`;},{passive:true});
-    inner.addEventListener('touchend',()=>{const d=sx-cx;if(d>70){inner.style.transform='translateX(-80px)';showConfirm('Delete this entry?','This outfit log will be permanently removed.',()=>{DB.logs.splice(idx,1);save();renderHistory();});setTimeout(()=>{inner.style.transform='';},400);}else inner.style.transform='';sw=false;});
+    inner.addEventListener('touchmove',e=>{cx=e.touches[0].clientX;const diff=sx-cx;if(diff>10)sw=true;if(sw)inner.style.transform=`translateX(${Math.min(0,-diff)}px)`;},{passive:true});
+    inner.addEventListener('touchend',()=>{const diff=sx-cx;if(diff>70){inner.style.transform='translateX(-80px)';showConfirm('Delete this entry?','This outfit log will be permanently removed.',()=>{DB.logs.splice(idx,1);save();renderHistory();});setTimeout(()=>{inner.style.transform='';},400);}else inner.style.transform='';sw=false;});
     list.appendChild(outer);
   });
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────
+function saveName(){DB.prefs.name=document.getElementById('name-input').value.trim();save();renderGreeting();}
 function updateBackupStatus(){const el=document.getElementById('backup-status');if(el)el.textContent=`${DB.items.filter(i=>!i.isArchived).length} items · ${DB.logs.length} logs`;}
 function updateSettingsCounts(){const a=document.getElementById('archive-count');if(a)a.textContent=`${DB.items.filter(i=>i.isArchived).length} archived items`;const sl=document.getElementById('offset-slider');if(sl){sl.value=DB.prefs.offset||0;document.getElementById('offset-label').textContent=`${(DB.prefs.offset||0)>=0?'+':''}${DB.prefs.offset||0}°F`;}updateBackupStatus();}
-function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}°F`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit();}
+function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}°F`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit(true);}
 function openBackup(){const ar=DB.items.filter(i=>i.isArchived).length;document.getElementById('backup-stats').innerHTML=`Wardrobe items: <strong>${DB.items.filter(i=>!i.isArchived).length}</strong> active, ${ar} archived<br>Outfit logs: <strong>${DB.logs.length}</strong><br>Temp offset: <strong>${(DB.prefs.offset||0)>=0?'+':''}${DB.prefs.offset||0}°F</strong>`;document.getElementById('sheet-backup').classList.add('open');}
 function exportBackup(){const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='stylecast-wardrobe.json';a.click();URL.revokeObjectURL(url);}
-function importBackup(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data.items||!data.logs)throw new Error();showConfirm('Restore from backup?','Current wardrobe and history will be replaced.',()=>{DB=data;save();renderWardrobe();renderHistory();generateOutfit();updateSettingsCounts();closeSheet('sheet-backup');alert('Restored successfully!');});}catch(e){alert('Could not read backup file.');}};reader.readAsText(file);input.value='';}
+function importBackup(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data.items||!data.logs)throw new Error();showConfirm('Restore from backup?','Current wardrobe and history will be replaced.',()=>{DB=data;if(!DB.prefs)DB.prefs={};save();renderWardrobe();renderHistory();generateOutfit();updateSettingsCounts();closeSheet('sheet-backup');alert('Restored successfully!');});}catch(e){alert('Could not read backup file.');}};reader.readAsText(file);input.value='';}
 
 // ── Navigation ────────────────────────────────────────────────────────────
-function switchTab(tab){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('screen-'+tab).classList.add('active');document.getElementById('nav-'+tab).classList.add('active');if(tab==='wardrobe')renderWardrobe();if(tab==='history')renderHistory();if(tab==='settings')updateSettingsCounts();}
+function switchTab(tab){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  document.getElementById('nav-'+tab).classList.add('active');
+  if(tab==='wardrobe')renderWardrobe();
+  if(tab==='history')renderHistory();
+  if(tab==='settings'){updateSettingsCounts();document.getElementById('name-input').value=DB.prefs.name||'';}
+}
 function closeSheet(id){document.getElementById(id).classList.remove('open');}
 
 // ── Confirm ───────────────────────────────────────────────────────────────
@@ -1033,16 +1285,17 @@ function confirmCancel(){document.getElementById('confirm-dialog').classList.rem
 // ── Init ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   applyTimeOfDay();
+  // Apply saved bg colour
+  if(DB.prefs.bgColor){document.documentElement.style.setProperty('--bg',DB.prefs.bgColor);document.getElementById('bg-preview-dot').style.background=DB.prefs.bgColor;}
   initColorPicker();
+  initOfficeMode();
+  renderGreeting();
   generateOutfit();
   initWeather();
   updateBackupStatus();
   checkYesterdayPrompt();
-  // Recheck time of day every 10 minutes
-  setInterval(applyTimeOfDay, 10*60*1000);
-  document.querySelectorAll('.sheet-overlay').forEach(o=>{
-    o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
-  });
+  setInterval(applyTimeOfDay,10*60*1000);
+  document.querySelectorAll('.sheet-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save();});
 });
 </script>
