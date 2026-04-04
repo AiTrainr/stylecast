@@ -31,7 +31,7 @@ body.night-mode{
 html,body{height:100%;overflow:hidden;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;background:var(--bg);color:var(--text);transition:background .8s,color .4s;}
 #app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;padding-top:var(--safe-top);}
-.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(80px + var(--safe-bot));min-height:0;}
+.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(75px + var(--safe-bot));min-height:0;}
 .screen.active{display:flex;flex-direction:column;gap:10px;}
 
 /* Nav */
@@ -1511,7 +1511,7 @@ function renderWardrobe(){
       ?`<span style="font-size:10px;font-weight:600;color:var(--faint);min-width:28px;text-align:right;">${wearCount}×</span>`
       :'';
     const div=document.createElement('div');div.className='list-item';
-    div.innerHTML=`<div style="flex:1;min-width:0;"><div class="item-name">${item.name}${officeDot}</div><div class="item-sub">${sub.label}</div></div><div class="item-right">${wearBadge}<span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
+    div.innerHTML=`<div style="flex:1;min-width:0;"><div class="item-name">${item.name}${officeDot}</div></div><div class="item-right">${wearBadge}<span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
     div.onclick=()=>openEditItem(item);list.appendChild(div);
   });
 }
@@ -1619,7 +1619,7 @@ function renderHistory(){
     const borderColor=
       logHour>=5&&logHour<12  ? '#FACA78' :
       logHour>=12&&logHour<17 ? '#85C1E9' :
-      logHour>=17&&logHour<20 ? '#F37D59' : '#9B7FD4';
+      logHour>=17&&logHour<20 ? '#C4A882' : '#9B7FD4';
     const outer=document.createElement('div');outer.className='log-row';
     outer.style.borderColor=borderColor;outer.style.borderWidth='1.5px';
     outer.innerHTML='<div class="log-delete-bg">Delete</div>';
