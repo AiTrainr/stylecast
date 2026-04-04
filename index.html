@@ -40,7 +40,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-
 .nav-btn svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke:currentColor;}
 .nav-btn.active{color:var(--primary);}
 .nav-add-wrap{display:flex;justify-content:center;align-items:center;}
-#nav-add-btn{width:52px;height:52px;background:var(--primary);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 12px rgba(104,199,193,.35);margin-top:-20px;flex-shrink:0;transition:transform .15s,background .4s;}
+#nav-add-btn{width:52px;height:52px;background:var(--primary);border:3px solid var(--bg);border-radius:50%;outline:2px solid var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 12px rgba(104,199,193,.35);margin-top:-20px;flex-shrink:0;transition:transform .15s,background .4s;}
 #nav-add-btn:active{transform:scale(.92);}
 #nav-add-btn svg{width:26px;height:26px;stroke:#fff;stroke-width:2.5;fill:none;}
 
@@ -355,7 +355,7 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
 <div id="screen-wardrobe" class="screen">
   <div class="page-header">
     <div class="page-title">Wardrobe</div>
-    <button style="background:none;border:none;color:var(--primary);font-size:28px;cursor:pointer;line-height:1;padding:0 4px;" onclick="openAddItem()">+</button>
+    <button onclick="openAddItem()" style="background:var(--primary);color:#fff;border:none;border-radius:99px;width:34px;height:34px;font-size:20px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15);line-height:1;">+</button>
   </div>
   <div class="pill-scroll"><div class="pill-row" id="wardrobe-filters"></div></div>
   <div id="wardrobe-list" style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;min-height:0;padding-top:4px;"></div>
@@ -386,8 +386,20 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
     <div style="color:var(--faint);font-size:18px;">›</div>
   </div>
   <div class="settings-row" onclick="openBgColorPicker()">
-    <div><div class="settings-row-title">App background colour</div><div class="settings-row-sub">Customise the background</div></div>
-    <div style="display:flex;align-items:center;gap:8px;"><div id="bg-preview-dot" style="width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);"></div><span style="color:var(--faint);font-size:18px;">›</span></div>
+    <div><div class="settings-row-title">App background colour</div><div class="settings-row-sub">Day &amp; night, custom colours</div></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div id="bg-day-dot"   style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#FFEDDD;"></div>
+      <div id="bg-night-dot" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#1E1628;"></div>
+      <span style="color:var(--faint);font-size:18px;">›</span>
+    </div>
+  </div>
+  <!-- Temperature unit -->
+  <div class="card" style="margin-top:0;">
+    <div class="card-title">Temperature units</div>
+    <div style="display:flex;gap:8px;">
+      <button id="unit-f-btn" onclick="setTempUnit('F')" class="btn btn-primary" style="font-size:13px;padding:9px 0;">Standard (°F)</button>
+      <button id="unit-c-btn" onclick="setTempUnit('C')" class="btn btn-secondary" style="font-size:13px;padding:9px 0;">Metric (°C)</button>
+    </div>
   </div>
   <div class="card" style="margin-top:4px;">
     <div class="card-title">Personal temp offset</div>
@@ -397,10 +409,10 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
       <span id="offset-label" style="font-size:15px;font-weight:700;min-width:40px;text-align:right;">0°F</span>
     </div>
   </div>
-  <div style="padding:28px 0 8px;text-align:center;">
+  <div class="card" style="margin-top:4px;text-align:center;padding:16px 14px;">
     <div style="font-size:14px;font-weight:600;color:var(--primary);letter-spacing:.3px;">One less decision. Every morning.</div>
-    <div style="font-size:11px;color:var(--faint);margin-top:8px;">StyleCast • Web App</div>
-    <div style="font-size:11px;color:var(--faint);margin-top:2px;">Add to Home Screen in Safari for the best experience</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">StyleCast • Web App</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:2px;">Add to Home Screen in Safari for the best experience</div>
   </div>
 </div>
 
@@ -601,13 +613,33 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
-      <div class="sheet-title">App Background</div>
-      <button class="sheet-close" onclick="closeSheet('sheet-bg-color')">Done</button>
+      <div class="sheet-title" id="bg-sheet-title">Day Background</div>
+      <button class="sheet-close" onclick="closeBgSheet()">Done</button>
     </div>
     <div class="sheet-body">
+      <!-- Day / Night tab -->
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" id="bg-tab-day"   onclick="setBgTab('day')"   style="font-size:13px;padding:9px 0;">☀️ Day</button>
+        <button class="btn btn-secondary" id="bg-tab-night" onclick="setBgTab('night')" style="font-size:13px;padding:9px 0;">🌙 Night</button>
+      </div>
+      <!-- Preset swatches -->
       <div class="form-label">Quick picks</div>
       <div class="color-swatches" id="bg-swatches"></div>
-      <div class="form-label">Custom colour</div>
+      <!-- Saved custom chips -->
+      <div id="bg-custom-chips-row" style="display:none;">
+        <div class="form-label" style="margin-bottom:6px;">Your saved colours <span style="font-size:10px;color:var(--faint);">(hold to delete)</span></div>
+        <div class="color-swatches" id="bg-custom-chips"></div>
+      </div>
+      <!-- Hex input -->
+      <div class="form-label">Enter hex code</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" class="form-input" id="bg-hex-input" placeholder="#FFEDDD" maxlength="7"
+          style="font-family:monospace;flex:1;text-transform:uppercase;"
+          oninput="onBgHexInput(this.value)">
+        <div id="bg-hex-preview" style="width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);flex-shrink:0;"></div>
+      </div>
+      <!-- Colour wheel -->
+      <div class="form-label">Colour wheel</div>
       <div class="color-wheel-wrap">
         <canvas id="bg-color-canvas" width="220" height="220"></canvas>
         <div class="brightness-row">
@@ -619,8 +651,9 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
           <span class="color-preview-hex" id="bg-color-preview-hex"></span>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="applyBgColor()">Apply background colour</button>
-      <button class="btn btn-secondary" onclick="resetBgColor()">Reset to default</button>
+      <button class="btn btn-primary" onclick="applyBgColor()">Apply colour</button>
+      <button class="btn btn-secondary" onclick="saveBgAsCustom()">Save as custom chip</button>
+      <button class="btn btn-outline" onclick="resetBgColor()">Reset to default</button>
     </div>
   </div>
 </div>
@@ -646,6 +679,9 @@ function saveData(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
 let DB=loadData();
 if(!DB.prefs)DB.prefs={offset:0,feedbackCount:0,name:'',bgColor:null};
 if(!DB.prefs.name)DB.prefs.name='';
+let useCelsius=DB.prefs.tempUnit==='C';
+function toDisplay(f){return useCelsius?Math.round((f-32)*5/9):Math.round(f);}
+function unitStr(){return useCelsius?'°C':'°F';}
 function save(){saveData(DB);}
 function uid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
 
@@ -683,6 +719,7 @@ function badgeCls(item){return item.subcategory==='dress'?'badge-dress':'badge-'
 function applyTimeOfDay(){
   const h=new Date().getHours();
   document.body.classList.toggle('night-mode',(h>=20||h<6));
+  applyStoredColors();
 }
 
 // ── Greeting ──────────────────────────────────────────────────────────────
@@ -777,7 +814,9 @@ let pickedColor='#A0A0A0';
 let pickedBgColor='#FFEDDD';
 let itemBrightnessVal=75;
 let bgBrightnessVal=85;
+let bgTab='day'; // 'day' | 'night'
 
+// ── Item colour picker ──────────────────────────────────────────────────
 function buildItemSwatches(){
   const wrap=document.getElementById('color-swatches');
   if(!wrap)return;wrap.innerHTML='';
@@ -785,15 +824,6 @@ function buildItemSwatches(){
     const d=document.createElement('div');d.className='color-swatch';d.style.background=hex;
     if(hex==='#FFFFFF')d.style.borderColor='#ccc';
     d.addEventListener('click',()=>{pickedColor=hex;syncItemColorPreview();wrap.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');});
-    wrap.appendChild(d);
-  });
-}
-function buildBgSwatches(){
-  const wrap=document.getElementById('bg-swatches');if(!wrap)return;wrap.innerHTML='';
-  BG_SWATCHES.forEach(({hex,name})=>{
-    const d=document.createElement('div');d.className='bg-swatch color-swatch';d.style.background=hex;d.title=name;
-    if(hex==='#FFFFFF'||hex==='#F5F0E8')d.style.borderColor='#ccc';
-    d.addEventListener('click',()=>{pickedBgColor=hex;syncBgColorPreview();wrap.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');});
     wrap.appendChild(d);
   });
 }
@@ -840,8 +870,14 @@ function syncItemColorPreview(){
   document.getElementById('color-preview-hex').textContent=pickedColor.toUpperCase();
 }
 function syncBgColorPreview(){
-  document.getElementById('bg-color-preview-dot').style.background=pickedBgColor;
-  document.getElementById('bg-color-preview-hex').textContent=pickedBgColor.toUpperCase();
+  const dot=document.getElementById('bg-color-preview-dot');
+  const hex=document.getElementById('bg-color-preview-hex');
+  const hexInput=document.getElementById('bg-hex-input');
+  const hexPrev=document.getElementById('bg-hex-preview');
+  if(dot)dot.style.background=pickedBgColor;
+  if(hex)hex.textContent=pickedBgColor.toUpperCase();
+  if(hexInput)hexInput.value=pickedBgColor.toUpperCase();
+  if(hexPrev)hexPrev.style.background=pickedBgColor;
 }
 function initColorPicker(){
   buildItemSwatches();
@@ -849,25 +885,157 @@ function initColorPicker(){
   const c=document.getElementById('color-canvas');
   if(c){c.addEventListener('click',e=>pickFromCanvas(e,'color-canvas',false));c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'color-canvas',false);},{passive:false});}
 }
-function openBgColorPicker(){
+
+// ── Hex input ──────────────────────────────────────────────────────────
+function onBgHexInput(val){
+  const clean=val.trim();
+  if(/^#[0-9A-Fa-f]{6}$/.test(clean)){
+    pickedBgColor=clean.toUpperCase();
+    syncBgColorPreview();
+    document.getElementById('bg-swatches').querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));
+  }
+}
+
+// ── BG color picker: day/night tabs, presets, custom chips, hex, wheel ─
+function setBgTab(tab){
+  bgTab=tab;
+  const dayBtn=document.getElementById('bg-tab-day');
+  const nightBtn=document.getElementById('bg-tab-night');
+  const titleEl=document.getElementById('bg-sheet-title');
+  if(dayBtn){dayBtn.className=tab==='day'?'btn btn-primary':'btn btn-secondary';dayBtn.style.fontSize='13px';dayBtn.style.padding='9px 0';}
+  if(nightBtn){nightBtn.className=tab==='night'?'btn btn-primary':'btn btn-secondary';nightBtn.style.fontSize='13px';nightBtn.style.padding='9px 0';}
+  if(titleEl)titleEl.textContent=tab==='day'?'Day Background':'Night Background';
+  // Load current color for this tab
+  const key=tab==='day'?'bgColorDay':'bgColorNight';
+  const defaults={bgColorDay:'#FFEDDD',bgColorNight:'#1E1628'};
+  pickedBgColor=DB.prefs[key]||defaults[key];
   buildBgSwatches();
-  pickedBgColor=DB.prefs.bgColor||'#FFEDDD';
-  drawColorWheel('bg-color-canvas',bgBrightnessVal);syncBgColorPreview();
+  buildCustomChips();
+  syncBgColorPreview();
+  drawColorWheel('bg-color-canvas',bgBrightnessVal);
+}
+
+function buildBgSwatches(){
+  const wrap=document.getElementById('bg-swatches');if(!wrap)return;wrap.innerHTML='';
+  // Day tab: warm/light presets; Night tab: dark presets
+  const dayPresets=[
+    {hex:'#FFEDDD',name:'Warm Cream'},{hex:'#F0EAE0',name:'Linen'},
+    {hex:'#E8EFF5',name:'Morning Mist'},{hex:'#F0EDE8',name:'Parchment'},
+    {hex:'#EAF0EA',name:'Sage Whisper'},{hex:'#F5EAF0',name:'Dusty Rose'},
+    {hex:'#EEE8F5',name:'Lavender Haze'},{hex:'#F5F0E0',name:'Butter'},
+    {hex:'#E8F0EE',name:'Sea Glass'},{hex:'#F0EAE8',name:'Terracotta Blush'},
+  ];
+  const nightPresets=[
+    {hex:'#1E1628',name:'Deep Purple'},{hex:'#121820',name:'Midnight'},
+    {hex:'#1A1A2E',name:'Navy Night'},{hex:'#0D1117',name:'Void'},
+    {hex:'#1C1C1C',name:'Charcoal'},{hex:'#1A1510',name:'Dark Oak'},
+    {hex:'#0F1A0F',name:'Forest Night'},{hex:'#1A0F1A',name:'Plum'},
+    {hex:'#101820',name:'Deep Teal'},{hex:'#1E1418',name:'Dark Rose'},
+  ];
+  const presets=bgTab==='day'?dayPresets:nightPresets;
+  presets.forEach(({hex,name})=>{
+    const d=document.createElement('div');d.className='bg-swatch color-swatch';d.style.background=hex;d.title=name;
+    const isLight=bgTab==='day';
+    if(isLight&&hex==='#FFFFFF')d.style.borderColor='#ccc';
+    const isCurrent=pickedBgColor.toUpperCase()===hex.toUpperCase();
+    if(isCurrent)d.classList.add('selected');
+    d.addEventListener('click',()=>{
+      pickedBgColor=hex;syncBgColorPreview();
+      wrap.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');
+    });
+    wrap.appendChild(d);
+  });
+}
+
+function buildCustomChips(){
+  if(!DB.prefs.customColors)DB.prefs.customColors={day:[],night:[]};
+  const key=bgTab;
+  const colors=DB.prefs.customColors[key]||[];
+  const row=document.getElementById('bg-custom-chips-row');
+  const wrap=document.getElementById('bg-custom-chips');
+  if(!row||!wrap)return;
+  if(!colors.length){row.style.display='none';return;}
+  row.style.display='block';wrap.innerHTML='';
+  colors.forEach((hex,idx)=>{
+    const d=document.createElement('div');d.className='bg-swatch color-swatch';d.style.background=hex;
+    const isCurrent=pickedBgColor.toUpperCase()===hex.toUpperCase();
+    if(isCurrent)d.classList.add('selected');
+    d.addEventListener('click',()=>{
+      pickedBgColor=hex;syncBgColorPreview();
+      wrap.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('selected'));d.classList.add('selected');
+    });
+    // Long press to delete
+    let pressTimer=null;
+    d.addEventListener('touchstart',()=>{pressTimer=setTimeout(()=>{
+      if(confirm('Remove this saved colour?')){
+        DB.prefs.customColors[key].splice(idx,1);save();buildCustomChips();
+      }
+    },600);},{passive:true});
+    d.addEventListener('touchend',()=>{clearTimeout(pressTimer);},{passive:true});
+    d.addEventListener('mousedown',()=>{pressTimer=setTimeout(()=>{
+      if(confirm('Remove this saved colour?')){DB.prefs.customColors[key].splice(idx,1);save();buildCustomChips();}
+    },600);});
+    d.addEventListener('mouseup',()=>clearTimeout(pressTimer));
+    wrap.appendChild(d);
+  });
+}
+
+function saveBgAsCustom(){
+  if(!DB.prefs.customColors)DB.prefs.customColors={day:[],night:[]};
+  const key=bgTab;
+  if(!DB.prefs.customColors[key])DB.prefs.customColors[key]=[];
+  if(!DB.prefs.customColors[key].includes(pickedBgColor)){
+    if(DB.prefs.customColors[key].length>=8)DB.prefs.customColors[key].shift();
+    DB.prefs.customColors[key].push(pickedBgColor);
+    save();buildCustomChips();
+  }
+}
+
+function openBgColorPicker(){
+  bgTab='day';
+  if(!DB.prefs.customColors)DB.prefs.customColors={day:[],night:[]};
+  // Wire up canvas once
   const c=document.getElementById('bg-color-canvas');
-  if(c){c.addEventListener('click',e=>pickFromCanvas(e,'bg-color-canvas',true));c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'bg-color-canvas',true);},{passive:false});}
+  if(c&&!c._wired){
+    c.addEventListener('click',e=>pickFromCanvas(e,'bg-color-canvas',true));
+    c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'bg-color-canvas',true);},{passive:false});
+    c._wired=true;
+  }
+  setBgTab('day');
   document.getElementById('sheet-bg-color').classList.add('open');
 }
-function applyBgColor(){
-  DB.prefs.bgColor=pickedBgColor;save();
-  document.documentElement.style.setProperty('--bg',pickedBgColor);
-  document.getElementById('bg-preview-dot').style.background=pickedBgColor;
+
+function closeBgSheet(){
+  // Update preview dots in settings
+  const dayDot=document.getElementById('bg-day-dot');
+  const nightDot=document.getElementById('bg-night-dot');
+  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#1E1628';
   closeSheet('sheet-bg-color');
 }
+
+function applyBgColor(){
+  const key=bgTab==='day'?'bgColorDay':'bgColorNight';
+  DB.prefs[key]=pickedBgColor;save();
+  applyStoredColors();
+  // Update dots in settings
+  const dayDot=document.getElementById('bg-day-dot');
+  const nightDot=document.getElementById('bg-night-dot');
+  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#1E1628';
+}
+
+function applyStoredColors(){
+  const isNight=document.body.classList.contains('night-mode');
+  const dayColor=DB.prefs.bgColorDay||DB.prefs.bgColor||'#FFEDDD';
+  const nightColor=DB.prefs.bgColorNight||'#1E1628';
+  document.documentElement.style.setProperty('--bg',isNight?nightColor:dayColor);
+}
+
 function resetBgColor(){
-  DB.prefs.bgColor=null;save();
-  document.documentElement.style.removeProperty('--bg');
-  document.getElementById('bg-preview-dot').style.background='var(--bg)';
-  closeSheet('sheet-bg-color');
+  const key=bgTab==='day'?'bgColorDay':'bgColorNight';
+  delete DB.prefs[key];save();
+  applyStoredColors();
 }
 
 // ── Weather ───────────────────────────────────────────────────────────────
@@ -929,8 +1097,8 @@ function updateWxCard(wx){
   card.style.borderColor=fc.border;
   card.style.color=isNight?'#EDE8F5':cfg.tc;
   document.getElementById('wx-left').textContent=cfg.icon;
-  document.getElementById('wx-temp').textContent=Math.round(wx.tempF)+'°F';
-  document.getElementById('wx-hilo').textContent=wx.hiF!=null?`H:${Math.round(wx.hiF)}° L:${Math.round(wx.loF)}°`:'';
+  document.getElementById('wx-temp').textContent=toDisplay(wx.tempF)+unitStr();
+  document.getElementById('wx-hilo').textContent=wx.hiF!=null?`H:${toDisplay(wx.hiF)}° L:${toDisplay(wx.loF)}°`:'';
   document.getElementById('wx-condition').textContent=cfg.label.toUpperCase();
   // Wind + UV alerts inline
   const alerts=[];
@@ -1317,6 +1485,10 @@ function closeFeedback(){document.getElementById('sheet-feedback').classList.rem
 
 // ── Wardrobe ──────────────────────────────────────────────────────────────
 let wardrobeFilter='all';
+// Compute wear count from history (so deleting a log decrements the tally)
+function getWearCount(itemId){
+  return DB.logs.filter(l=>l.itemIDs&&l.itemIDs.includes(itemId)).length;
+}
 function renderWardrobe(){
   const pillRow=document.getElementById('wardrobe-filters');pillRow.innerHTML='';
   ['all',...Object.keys(CATS)].forEach(cat=>{
@@ -1332,7 +1504,7 @@ function renderWardrobe(){
     const sub=subByKey(item.subcategory);const cls=badgeCls(item);
     const blob=item.color?`<span class="color-blob" style="background:${item.color};"></span>`:'';
     const officeDot=item.officeOk===true?'<span style="font-size:10px;margin-left:3px;opacity:.6;">💼</span>':'';
-    const wearCount=item.timesWorn||0;
+    const wearCount=getWearCount(item.id);
     const wearBadge=wearCount>0
       ?`<span style="font-size:10px;font-weight:600;color:var(--faint);min-width:28px;text-align:right;">${wearCount}×</span>`
       :'';
@@ -1419,29 +1591,40 @@ function restoreItem(id){const item=DB.items.find(i=>i.id===id);if(!item)return;
 function renderHistory(){
   const list=document.getElementById('history-list');list.innerHTML='';
   if(!DB.logs.length){list.innerHTML='<div class="empty"><div class="empty-icon">🕐</div><div class="empty-text">No history yet. Log an outfit from the Today tab.</div></div>';return;}
+  const hint=document.createElement('div');
+  hint.style.cssText='font-size:11px;color:var(--faint);text-align:center;padding:2px 0 6px;';
+  hint.textContent='Tap to edit ratings  ·  Swipe left to delete';
+  list.appendChild(hint);
   DB.logs.forEach((log,idx)=>{
     const d=new Date(log.date);
     const dateStr=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     const timeStr=log.isRetroactive?'':(': '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));
     const feelMap={tooHot:'Too hot',warm:'Warm',great:'Great',cool:'Cool',cold:'Cold'};
     const feelHTML=log.overallFeel?`<span class="log-feel feel-${log.overallFeel}">${feelMap[log.overallFeel]}</span>`:'';
-    // Weather: retroactive shows H/L only, live shows current temp
+    const unit=useCelsius?'\u00b0C':'\u00b0F';
     let metaStr='';
     if(log.isRetroactive){
-      if(log.hiF!=null)metaStr=`H:${log.hiF}° L:${log.loF}°`;
+      if(log.hiF!=null){
+        const hi=useCelsius?Math.round((log.hiF-32)*5/9):log.hiF;
+        const lo=useCelsius?Math.round((log.loF-32)*5/9):log.loF;
+        metaStr=`H:${hi}${unit} L:${lo}${unit}`;
+      }
     }else if(log.tempF!=null){
-      metaStr=log.tempF+'°F'+(log.condition?(` · ${WX[log.condition]?.label||''}`):'' );
+      const t=useCelsius?Math.round((log.tempF-32)*5/9):log.tempF;
+      metaStr=t+unit+(log.condition?(` · ${WX[log.condition]?.label||''}`):'' );
     }
+    const logHour=d.getHours();
+    const borderColor=
+      logHour>=5&&logHour<12  ? '#FACA78' :
+      logHour>=12&&logHour<17 ? '#85C1E9' :
+      logHour>=17&&logHour<20 ? '#F37D59' : '#9B7FD4';
     const outer=document.createElement('div');outer.className='log-row';
+    outer.style.borderColor=borderColor;outer.style.borderWidth='1.5px';
     outer.innerHTML='<div class="log-delete-bg">Delete</div>';
     const inner=document.createElement('div');inner.className='log-inner';
-    inner.innerHTML=`<div class="log-date">${dateStr}${timeStr}${log.isRetroactive?' <span style="font-size:10px;opacity:.6;">(retroactive)</span>':''}</div><div class="log-items">${log.itemNames}</div>${metaStr?`<div class="log-meta">${metaStr}</div>`:''}${feelHTML}<div style="font-size:10px;color:var(--faint);margin-top:4px;">Tap to edit ratings &nbsp;·&nbsp; Swipe left to delete</div>`;
+    inner.innerHTML=`<div class="log-date">${dateStr}${timeStr}${log.isRetroactive?' <span style="font-size:10px;opacity:.6;">(retroactive)</span>':''}</div><div class="log-items">${log.itemNames}</div>${metaStr?`<div class="log-meta">${metaStr}</div>`:''}${feelHTML}`;
     outer.appendChild(inner);
-    // Tap inner row → open edit feedback sheet pre-populated
-    inner.addEventListener('click',()=>{
-      openEditFeedback(log);
-    });
-    // Swipe left → reveal delete
+    inner.addEventListener('click',()=>{ openEditFeedback(log); });
     let sx=0,cx=0,sw=false;
     inner.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sw=false;},{passive:true});
     inner.addEventListener('touchmove',e=>{cx=e.touches[0].clientX;const diff=sx-cx;if(diff>12)sw=true;if(sw)inner.style.transform=`translateX(${Math.min(0,-diff)}px)`;},{passive:true});
@@ -1449,13 +1632,11 @@ function renderHistory(){
       const diff=sx-cx;
       if(sw&&diff>70){
         inner.style.transform='translateX(-80px)';
-        showConfirm('Delete this entry?','This outfit log will be permanently removed.',()=>{DB.logs.splice(idx,1);save();renderHistory();});
+        showConfirm('Delete this entry?','This outfit log will be permanently removed.',()=>{
+          DB.logs.splice(idx,1);save();renderHistory();renderWardrobe();
+        });
         setTimeout(()=>{inner.style.transform='';},400);
-      }else{
-        inner.style.transform='';
-        // Only fire click if it wasn't a swipe attempt
-        if(!sw){}
-      }
+      }else{inner.style.transform='';}
       sw=false;
     });
     list.appendChild(outer);
@@ -1463,10 +1644,34 @@ function renderHistory(){
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────
+function setTempUnit(unit){
+  useCelsius=(unit==='C');
+  DB.prefs.tempUnit=unit;save();
+  // Update button styles
+  const fBtn=document.getElementById('unit-f-btn');
+  const cBtn=document.getElementById('unit-c-btn');
+  if(fBtn){fBtn.className=!useCelsius?'btn btn-primary':'btn btn-secondary';fBtn.style.fontSize='13px';fBtn.style.padding='9px 0';}
+  if(cBtn){cBtn.className=useCelsius?'btn btn-primary':'btn btn-secondary';cBtn.style.fontSize='13px';cBtn.style.padding='9px 0';}
+  // Update offset label
+  const oLabel=document.getElementById('offset-label');
+  if(oLabel){const v=DB.prefs.offset||0;oLabel.textContent=`${v>=0?'+':''}${v}${unitStr()}`;}
+  if(wxSnapshot)updateWxCard(wxSnapshot);
+}
 function saveName(){DB.prefs.name=document.getElementById('name-input').value.trim();save();renderGreeting();}
 function updateBackupStatus(){const el=document.getElementById('backup-status');if(el)el.textContent=`${DB.items.filter(i=>!i.isArchived).length} items · ${DB.logs.length} logs`;}
-function updateSettingsCounts(){const a=document.getElementById('archive-count');if(a)a.textContent=`${DB.items.filter(i=>i.isArchived).length} archived items`;const sl=document.getElementById('offset-slider');if(sl){sl.value=DB.prefs.offset||0;document.getElementById('offset-label').textContent=`${(DB.prefs.offset||0)>=0?'+':''}${DB.prefs.offset||0}°F`;}updateBackupStatus();}
-function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}°F`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit(true);}
+function updateSettingsCounts(){
+  const a=document.getElementById('archive-count');if(a)a.textContent=`${DB.items.filter(i=>i.isArchived).length} archived items`;
+  const sl=document.getElementById('offset-slider');
+  if(sl){sl.value=DB.prefs.offset||0;const v=DB.prefs.offset||0;document.getElementById('offset-label').textContent=`${v>=0?'+':''}${v}${unitStr()}`;}
+  updateBackupStatus();
+  // Sync unit buttons
+  setTempUnit(DB.prefs.tempUnit||'F');
+  // Sync bg preview dots
+  const dayDot=document.getElementById('bg-day-dot');const nightDot=document.getElementById('bg-night-dot');
+  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||DB.prefs.bgColor||'#FFEDDD';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#1E1628';
+}
+function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}${unitStr()}`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit(true);}
 function openBackup(){const ar=DB.items.filter(i=>i.isArchived).length;document.getElementById('backup-stats').innerHTML=`Wardrobe items: <strong>${DB.items.filter(i=>!i.isArchived).length}</strong> active, ${ar} archived<br>Outfit logs: <strong>${DB.logs.length}</strong><br>Temp offset: <strong>${(DB.prefs.offset||0)>=0?'+':''}${DB.prefs.offset||0}°F</strong>`;document.getElementById('sheet-backup').classList.add('open');}
 function exportBackup(){const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='stylecast-wardrobe.json';a.click();URL.revokeObjectURL(url);}
 function importBackup(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data.items||!data.logs)throw new Error();showConfirm('Restore from backup?','Current wardrobe and history will be replaced.',()=>{DB=data;if(!DB.prefs)DB.prefs={};save();renderWardrobe();renderHistory();generateOutfit();updateSettingsCounts();closeSheet('sheet-backup');alert('Restored successfully!');});}catch(e){alert('Could not read backup file.');}};reader.readAsText(file);input.value='';}
@@ -1491,9 +1696,9 @@ function confirmCancel(){document.getElementById('confirm-dialog').classList.rem
 
 // ── Init ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
-  applyTimeOfDay();
-  // Apply saved bg colour
-  if(DB.prefs.bgColor){document.documentElement.style.setProperty('--bg',DB.prefs.bgColor);document.getElementById('bg-preview-dot').style.background=DB.prefs.bgColor;}
+  applyTimeOfDay(); // also calls applyStoredColors
+  if(!DB.prefs.customColors)DB.prefs.customColors={day:[],night:[]};
+  useCelsius=(DB.prefs.tempUnit==='C');
   initColorPicker();
   initOfficeMode();
   syncAccessoriesToggle();
