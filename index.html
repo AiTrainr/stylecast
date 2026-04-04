@@ -910,15 +910,23 @@ function generateOutfit(preserveItems){
   }
 
   // ── SHIRT LAYER (always required unless dress chosen) ──────────────────
-  // No temperature gate on the shirt itself — the user always wears a shirt.
-  // Temperature determines WHICH shirt (tank/short/long) is appropriate.
-  // Long sleeve is always valid as a base layer regardless of temp.
-  const shirtPool=pool.filter(i=>i.category==='tops'&&i.subcategory!=='dress').filter(i=>{
+  // Priority order when cold: longSleeve > shortSleeve > tankTop
+  // Priority order when warm: shortSleeve > tankTop > longSleeve
+  // A shirt is ALWAYS suggested when outerwear is present.
+  // We build a scored pool but guarantee something is picked if any top exists.
+
+  const allShirts=pool.filter(i=>i.category==='tops'&&i.subcategory!=='dress');
+
+  // Preferred shirts for this temperature
+  const preferredShirts=allShirts.filter(i=>{
     if(i.subcategory==='tankTop')    return tempF>=68;
-    if(i.subcategory==='shortSleeve')return tempF>=52;
-    // longSleeve: always a valid base layer — no upper temp gate
-    return true;
+    if(i.subcategory==='shortSleeve')return tempF>=50;
+    return true; // longSleeve always preferred in any temp
   });
+
+  // Fallback: if nothing passes the temp filter, use ANY shirt
+  // (e.g. only short sleeves in wardrobe but it's cold — still suggest one)
+  const shirtPool=preferredShirts.length>0 ? preferredShirts : allShirts;
 
   // ── DRESS (replaces shirt+bottom combo) ────────────────────────────────
   const dressPool=pool.filter(i=>i.subcategory==='dress'&&tempF>=50);
