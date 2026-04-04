@@ -31,7 +31,7 @@ body.night-mode{
 html,body{height:100%;overflow:hidden;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;background:var(--bg);color:var(--text);transition:background .8s,color .4s;}
 #app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;padding-top:var(--safe-top);}
-.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 8px;min-height:0;}
+.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(80px + var(--safe-bot));min-height:0;}
 .screen.active{display:flex;flex-direction:column;gap:10px;}
 
 /* Nav */
@@ -355,7 +355,7 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
 <div id="screen-wardrobe" class="screen">
   <div class="page-header">
     <div class="page-title">Wardrobe</div>
-    <button onclick="openAddItem()" style="background:var(--primary);color:#fff;border:none;border-radius:99px;width:34px;height:34px;font-size:20px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15);line-height:1;">+</button>
+    <button onclick="openAddItem()" style="background:var(--primary);color:#fff;border:none;border-radius:99px;width:34px;height:34px;font-size:22px;font-weight:400;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15);flex-shrink:0;padding:0;">+</button>
   </div>
   <div class="pill-scroll"><div class="pill-row" id="wardrobe-filters"></div></div>
   <div id="wardrobe-list" style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;min-height:0;padding-top:4px;"></div>
@@ -389,7 +389,7 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
     <div><div class="settings-row-title">App background colour</div><div class="settings-row-sub">Day &amp; night, custom colours</div></div>
     <div style="display:flex;align-items:center;gap:6px;">
       <div id="bg-day-dot"   style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#FFEDDD;"></div>
-      <div id="bg-night-dot" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#1E1628;"></div>
+      <div id="bg-night-dot" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#2D1F4A;"></div>
       <span style="color:var(--faint);font-size:18px;">›</span>
     </div>
   </div>
@@ -708,8 +708,8 @@ const SUBS=[
   {key:'hat',        label:'Hat',         cat:'accessories',  warmth:1},
   {key:'clip',       label:'Hair Clip',   cat:'accessories',  warmth:0},
 ];
-// Slot order for display: outerwear, top, bottom, socks, shoes, accessories
-const SLOT_ORDER=['outerwear','top','bottom','socks','shoes','accessory'];
+// Slot order for display: accessories at top, then outerwear, top, bottom, socks, shoes
+const SLOT_ORDER=['accessory','outerwear','top','bottom','socks','shoes'];
 // Wardrobe category order
 const CATS={tops:'Tops',outerwear:'Outerwear',bottoms:'Bottoms',socks:'Socks',shoes:'Shoes',accessories:'Accessories',formal:'Formal'};
 function subByKey(k){return SUBS.find(s=>s.key===k)||SUBS[1];}
@@ -797,18 +797,6 @@ const SWATCHES=[
   '#1A5276','#2471A3','#3498DB','#85C1E9','#1E3A5F','#5DADE2',
   '#1E8449','#27AE60','#58D68D','#A9DFBF','#0E6655','#76D7C4',
   '#6C3483','#8E44AD','#BB8FCE','#D7BDE2','#4A235A','#E8DAEF',
-];
-const BG_SWATCHES=[
-  {hex:'#FFEDDD',name:'Warm Cream (default)'},
-  {hex:'#F0EAE0',name:'Linen'},
-  {hex:'#E8EFF5',name:'Morning Mist'},
-  {hex:'#F0EDE8',name:'Parchment'},
-  {hex:'#EAF0EA',name:'Sage Whisper'},
-  {hex:'#F5EAF0',name:'Dusty Rose'},
-  {hex:'#EEE8F5',name:'Lavender Haze'},
-  {hex:'#F5F0E0',name:'Butter'},
-  {hex:'#E8F0EE',name:'Sea Glass'},
-  {hex:'#F0EAE8',name:'Terracotta Blush'},
 ];
 let pickedColor='#A0A0A0';
 let pickedBgColor='#FFEDDD';
@@ -907,7 +895,7 @@ function setBgTab(tab){
   if(titleEl)titleEl.textContent=tab==='day'?'Day Background':'Night Background';
   // Load current color for this tab
   const key=tab==='day'?'bgColorDay':'bgColorNight';
-  const defaults={bgColorDay:'#FFEDDD',bgColorNight:'#1E1628'};
+  const defaults={bgColorDay:'#FFEDDD',bgColorNight:'#2D1F4A'};
   pickedBgColor=DB.prefs[key]||defaults[key];
   buildBgSwatches();
   buildCustomChips();
@@ -919,18 +907,28 @@ function buildBgSwatches(){
   const wrap=document.getElementById('bg-swatches');if(!wrap)return;wrap.innerHTML='';
   // Day tab: warm/light presets; Night tab: dark presets
   const dayPresets=[
-    {hex:'#FFEDDD',name:'Warm Cream'},{hex:'#F0EAE0',name:'Linen'},
-    {hex:'#E8EFF5',name:'Morning Mist'},{hex:'#F0EDE8',name:'Parchment'},
-    {hex:'#EAF0EA',name:'Sage Whisper'},{hex:'#F5EAF0',name:'Dusty Rose'},
-    {hex:'#EEE8F5',name:'Lavender Haze'},{hex:'#F5F0E0',name:'Butter'},
-    {hex:'#E8F0EE',name:'Sea Glass'},{hex:'#F0EAE8',name:'Terracotta Blush'},
+    {hex:'#FFEDDD',name:'Warm Cream'},
+    {hex:'#F0EAE0',name:'Linen'},
+    {hex:'#E8EFF5',name:'Morning Mist'},
+    {hex:'#EAF0EA',name:'Sage Whisper'},
+    {hex:'#F5EAF0',name:'Dusty Rose'},
+    {hex:'#EEE8F5',name:'Lavender Haze'},
+    {hex:'#E8F0EE',name:'Sea Glass'},
+    {hex:'#FFF8E8',name:'Honeydew'},
+    {hex:'#E8EAF0',name:'Slate Mist'},
+    {hex:'#F5EDE0',name:'Almond'},
   ];
   const nightPresets=[
-    {hex:'#1E1628',name:'Deep Purple'},{hex:'#121820',name:'Midnight'},
-    {hex:'#1A1A2E',name:'Navy Night'},{hex:'#0D1117',name:'Void'},
-    {hex:'#1C1C1C',name:'Charcoal'},{hex:'#1A1510',name:'Dark Oak'},
-    {hex:'#0F1A0F',name:'Forest Night'},{hex:'#1A0F1A',name:'Plum'},
-    {hex:'#101820',name:'Deep Teal'},{hex:'#1E1418',name:'Dark Rose'},
+    {hex:'#2D1F4A',name:'Muted Purple'},
+    {hex:'#1E2A3A',name:'Slate Night'},
+    {hex:'#1A2420',name:'Forest Dark'},
+    {hex:'#2A1A2E',name:'Plum Dusk'},
+    {hex:'#1E1E2E',name:'Deep Navy'},
+    {hex:'#2A2018',name:'Dark Oak'},
+    {hex:'#1A2030',name:'Midnight Blue'},
+    {hex:'#251828',name:'Wine Dark'},
+    {hex:'#1E2820',name:'Dark Sage'},
+    {hex:'#2C2040',name:'Violet Dusk'},
   ];
   const presets=bgTab==='day'?dayPresets:nightPresets;
   presets.forEach(({hex,name})=>{
@@ -1010,7 +1008,7 @@ function closeBgSheet(){
   const dayDot=document.getElementById('bg-day-dot');
   const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#1E1628';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
   closeSheet('sheet-bg-color');
 }
 
@@ -1022,13 +1020,15 @@ function applyBgColor(){
   const dayDot=document.getElementById('bg-day-dot');
   const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#1E1628';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
 }
 
 function applyStoredColors(){
   const isNight=document.body.classList.contains('night-mode');
-  const dayColor=DB.prefs.bgColorDay||DB.prefs.bgColor||'#FFEDDD';
-  const nightColor=DB.prefs.bgColorNight||'#1E1628';
+  // Migrate stale single bgColor to day slot
+  if(DB.prefs.bgColor&&!DB.prefs.bgColorDay){DB.prefs.bgColorDay=DB.prefs.bgColor;delete DB.prefs.bgColor;save();}
+  const dayColor=DB.prefs.bgColorDay||'#FFEDDD';
+  const nightColor=DB.prefs.bgColorNight||'#2D1F4A';
   document.documentElement.style.setProperty('--bg',isNight?nightColor:dayColor);
 }
 
@@ -1302,15 +1302,17 @@ function _doLog(pieces,dateISO,isRetroactive){
 
 // ── Yesterday prompt ──────────────────────────────────────────────────────
 function checkYesterdayPrompt(){
+  // Use local date to avoid UTC offset false positives
   const yest=new Date();yest.setDate(yest.getDate()-1);
-  const yStr=yest.toISOString().slice(0,10);
-  const hasLog=DB.logs.some(l=>l.date.slice(0,10)===yStr);
+  const yLocal=`${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+  function localDateStr(iso){const d=new Date(iso);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  const hasLog=DB.logs.some(l=>localDateStr(l.date)===yLocal);
   const dismissed=sessionStorage.getItem('yest_dismissed');
   const prompt=document.getElementById('yesterday-prompt');
   if(!hasLog&&!dismissed){
     prompt.style.display='block';
     const yLabel=yest.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
-    prompt.innerHTML=`<div class="prompt-banner"><div class="prompt-icon">📅</div><div class="prompt-text" onclick="openManualLog('${yStr}')"><strong>Missing yesterday</strong><br>No outfit logged for ${yLabel}. Tap to add.</div><button class="prompt-close" onclick="dismissYest(event)">×</button></div>`;
+    prompt.innerHTML=`<div class="prompt-banner"><div class="prompt-icon">📅</div><div class="prompt-text" onclick="openManualLog('${yLocal}')"><strong>Missing yesterday</strong><br>No outfit logged for ${yLabel}. Tap to add.</div><button class="prompt-close" onclick="dismissYest(event)">×</button></div>`;
   }else{prompt.style.display='none';}
 }
 function dismissYest(e){e.stopPropagation();sessionStorage.setItem('yest_dismissed','1');document.getElementById('yesterday-prompt').style.display='none';}
@@ -1669,7 +1671,7 @@ function updateSettingsCounts(){
   // Sync bg preview dots
   const dayDot=document.getElementById('bg-day-dot');const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||DB.prefs.bgColor||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#1E1628';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
 }
 function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}${unitStr()}`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit(true);}
 function openBackup(){const ar=DB.items.filter(i=>i.isArchived).length;document.getElementById('backup-stats').innerHTML=`Wardrobe items: <strong>${DB.items.filter(i=>!i.isArchived).length}</strong> active, ${ar} archived<br>Outfit logs: <strong>${DB.logs.length}</strong><br>Temp offset: <strong>${(DB.prefs.offset||0)>=0?'+':''}${DB.prefs.offset||0}°F</strong>`;document.getElementById('sheet-backup').classList.add('open');}
