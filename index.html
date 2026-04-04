@@ -70,7 +70,20 @@ body.night-mode #wx-card{background:#2A1F3D;}
 .tb-pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;border:0.5px solid var(--sand);background:var(--card);color:var(--muted);cursor:pointer;transition:background .12s,color .12s;}
 .tb-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 
-/* Office toggle row */
+/* Mode toggle cards (Office / Accessories) */
+.mode-card{
+  background:var(--card);border-radius:12px;padding:11px 12px;
+  border:1.5px solid var(--border);cursor:pointer;
+  transition:background .25s,border-color .25s,opacity .15s;
+}
+.mode-card:active{opacity:.75;}
+.mode-card.active{background:rgba(104,199,193,.12);border-color:var(--primary);}
+body.night-mode .mode-card.active{background:rgba(155,127,212,.15);border-color:var(--primary);}
+
+/* Scrollable outfit list */
+#outfit-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* Office row (legacy, keep for spacing) */
 .office-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:10px;padding:10px 14px;border:0.5px solid var(--border);transition:background .4s;}
 .office-row-left{display:flex;align-items:center;gap:8px;}
 .office-icon{font-size:16px;}
@@ -94,6 +107,7 @@ body.night-mode #wx-card{background:#2A1F3D;}
 .badge-socks     {background:#E8E4DA;      color:#4A3A28;}
 .badge-formal    {background:#EEEAE4;      color:#5A4A3A;}
 .badge-dress     {background:#EDD5F0;      color:#5A2070;}
+.badge-accessories{background:#DFF0F8;     color:#1A4A60;}
 body.night-mode .badge-tops      {background:#2A5A58;color:#90D8D4;}
 body.night-mode .badge-outerwear {background:#4A3A18;color:#D4B870;}
 body.night-mode .badge-bottoms   {background:#5A2828;color:#E49898;}
@@ -101,6 +115,7 @@ body.night-mode .badge-shoes     {background:#4A3A10;color:#D4B060;}
 body.night-mode .badge-socks     {background:#303028;color:#B4B0A0;}
 body.night-mode .badge-formal    {background:#2A2838;color:#A8A0C0;}
 body.night-mode .badge-dress     {background:#482058;color:#D0A0E8;}
+body.night-mode .badge-accessories{background:#183040;color:#80C8E8;}
 
 /* Color blob */
 .color-blob{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(0,0,0,.12);flex-shrink:0;display:inline-block;vertical-align:middle;}
@@ -277,20 +292,29 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
     <div id="wx-mid">
       <div id="wx-temp-row"><span id="wx-temp">--°F</span><span id="wx-hilo"></span></div>
       <div id="wx-condition">FETCHING WEATHER...</div>
+      <div id="wx-alerts" style="font-size:11px;font-weight:600;color:var(--coral);margin-top:1px;display:none;"></div>
       <div id="wx-date-loc">Getting location...</div>
     </div>
     <div id="wx-feel">...</div>
   </div>
-  <!-- Office day toggle -->
-  <div class="office-row" id="office-row">
-    <div class="office-row-left">
-      <span class="office-icon">💼</span>
-      <div>
-        <div class="office-label">Office day</div>
-        <div class="office-sub" id="office-sub">Suggest work-appropriate outfits</div>
+  <!-- Office + Accessories toggles side by side -->
+  <div style="display:flex;gap:8px;">
+    <div class="mode-card" id="office-card" onclick="toggleOfficeMode()" style="flex:1;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <span style="font-size:18px;">💼</span>
+        <button class="toggle" id="office-toggle" onclick="event.stopPropagation();toggleOfficeMode()"></button>
       </div>
+      <div style="font-size:13px;font-weight:700;margin-top:6px;">Office day</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="office-sub">Off</div>
     </div>
-    <button class="toggle" id="office-toggle" onclick="toggleOfficeMode()"></button>
+    <div class="mode-card" id="acc-card" onclick="toggleAccessoriesMode()" style="flex:1;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <span style="font-size:18px;">🕶</span>
+        <button class="toggle" id="acc-toggle" onclick="event.stopPropagation();toggleAccessoriesMode()"></button>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin-top:6px;">Accessories</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="acc-sub">Off</div>
+    </div>
   </div>
   <!-- Outfit header with temp basis -->
   <div class="outfit-header">
@@ -467,7 +491,7 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
-      <div class="sheet-title">How was today?</div>
+      <div class="sheet-title" id="feedback-sheet-title">How was today?</div>
       <button class="sheet-close" onclick="closeFeedback()">Skip</button>
     </div>
     <div class="sheet-body">
@@ -629,12 +653,15 @@ const SUBS=[
   {key:'shoes',      label:'Shoes',       cat:'shoes',    warmth:3},
   {key:'sandals',    label:'Sandals',     cat:'shoes',    warmth:1},
   {key:'socks',      label:'Socks',       cat:'socks',    warmth:1},
-  {key:'formalWear', label:'Formal',      cat:'formal',   warmth:3},
+  {key:'formalWear', label:'Formal',      cat:'formal',       warmth:3},
+  {key:'sunglasses', label:'Sunglasses',  cat:'accessories',  warmth:0},
+  {key:'hat',        label:'Hat',         cat:'accessories',  warmth:1},
+  {key:'clip',       label:'Hair Clip',   cat:'accessories',  warmth:0},
 ];
-// Slot order for display: outerwear, top, bottom, socks, shoes
-const SLOT_ORDER=['outerwear','top','bottom','socks','shoes'];
-// Wardrobe category order: Tops, Outerwear, Bottoms, Socks, Shoes, Formal
-const CATS={tops:'Tops',outerwear:'Outerwear',bottoms:'Bottoms',socks:'Socks',shoes:'Shoes',formal:'Formal'};
+// Slot order for display: outerwear, top, bottom, socks, shoes, accessories
+const SLOT_ORDER=['outerwear','top','bottom','socks','shoes','accessory'];
+// Wardrobe category order
+const CATS={tops:'Tops',outerwear:'Outerwear',bottoms:'Bottoms',socks:'Socks',shoes:'Shoes',accessories:'Accessories',formal:'Formal'};
 function subByKey(k){return SUBS.find(s=>s.key===k)||SUBS[1];}
 function badgeCls(item){return item.subcategory==='dress'?'badge-dress':'badge-'+item.category;}
 
@@ -660,11 +687,13 @@ function renderGreeting(){
 
 // ── Office mode ───────────────────────────────────────────────────────────
 let officeModeOn=false;
+let accessoriesModeOn=false;
+
 function initOfficeMode(){
   const h=new Date().getHours(),d=new Date().getDay();
   const isWeekday=(d>=1&&d<=5);
-  const isOfficHours=(h>=4&&(h<9||(h===9&&new Date().getMinutes()<=30)));
-  officeModeOn=isWeekday&&isOfficHours;
+  const isOfficeHours=(h>=4&&(h<9||(h===9&&new Date().getMinutes()<=30)));
+  officeModeOn=isWeekday&&isOfficeHours;
   syncOfficeToggle();
 }
 function toggleOfficeMode(){
@@ -674,9 +703,22 @@ function toggleOfficeMode(){
 }
 function syncOfficeToggle(){
   const btn=document.getElementById('office-toggle');
+  const card=document.getElementById('office-card');
   btn.className='toggle'+(officeModeOn?' on':'');
-  document.getElementById('office-sub').textContent=
-    officeModeOn?'Showing office-appropriate outfits':'Showing casual outfits';
+  card.classList.toggle('active',officeModeOn);
+  document.getElementById('office-sub').textContent=officeModeOn?'Work outfits only':'Off';
+}
+function toggleAccessoriesMode(){
+  accessoriesModeOn=!accessoriesModeOn;
+  syncAccessoriesToggle();
+  generateOutfit();
+}
+function syncAccessoriesToggle(){
+  const btn=document.getElementById('acc-toggle');
+  const card=document.getElementById('acc-card');
+  btn.className='toggle'+(accessoriesModeOn?' on':'');
+  card.classList.toggle('active',accessoriesModeOn);
+  document.getElementById('acc-sub').textContent=accessoriesModeOn?'On':'Off';
 }
 
 // ── Temp basis ────────────────────────────────────────────────────────────
@@ -838,9 +880,16 @@ const FEEL={
 function getFeel(t){const a=t+(DB.prefs.offset||0);if(a>=85)return'hot';if(a>=72)return'warm';if(a>=60)return'comfortable';if(a>=48)return'cool';if(a>=35)return'cold';return'veryCold';}
 function mapWMO(c){if(c<=1)return'sunny';if(c===2)return'partlyCloudy';if(c===3)return'cloudy';if(c===45||c===48)return'fog';if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(c))return'rain';if([71,73,75,77,85,86].includes(c))return'snow';if([95,96,99].includes(c))return'storm';return'partlyCloudy';}
 async function fetchWeather(lat,lon){
-  const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&forecast_days=1&timezone=auto`;
+  const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,uv_index_max&temperature_unit=fahrenheit&wind_speed_unit=mph&forecast_days=1&timezone=auto`;
   const d=await(await fetch(u)).json();
-  return{tempF:d.current.temperature_2m,hiF:d.daily.temperature_2m_max[0],loF:d.daily.temperature_2m_min[0],condition:mapWMO(d.current.weather_code)};
+  return{
+    tempF:d.current.temperature_2m,
+    hiF:d.daily.temperature_2m_max[0],
+    loF:d.daily.temperature_2m_min[0],
+    condition:mapWMO(d.current.weather_code),
+    windMph:d.current.windspeed_10m??0,
+    uvIndex:d.daily.uv_index_max?.[0]??0,
+  };
 }
 function initWeather(){
   if(!navigator.geolocation){updateWxCard(null);return;}
@@ -871,6 +920,12 @@ function updateWxCard(wx){
   document.getElementById('wx-temp').textContent=Math.round(wx.tempF)+'°F';
   document.getElementById('wx-hilo').textContent=wx.hiF!=null?`H:${Math.round(wx.hiF)}° L:${Math.round(wx.loF)}°`:'';
   document.getElementById('wx-condition').textContent=cfg.label.toUpperCase();
+  // Wind + UV alerts inline
+  const alerts=[];
+  if(wx.windMph>=15)alerts.push(`💨 ${Math.round(wx.windMph)}mph`);
+  if(wx.uvIndex>=6)alerts.push(`🕶 UV ${Math.round(wx.uvIndex)}`);
+  const alertEl=document.getElementById('wx-alerts');
+  if(alertEl){alertEl.textContent=alerts.join('  ');alertEl.style.display=alerts.length?'block':'none';}
   const now=new Date(),day=now.getDate(),d2=day%10,exc=[11,12,13];
   const sfx=exc.includes(day%100)?'th':(['th','st','nd','rd'][Math.min(d2,3)]||'th');
   document.getElementById('wx-date-loc').textContent=`${now.toLocaleDateString('en-US',{weekday:'long'})}, ${now.toLocaleDateString('en-US',{month:'long'})} ${day}${sfx} ${now.getFullYear()}`;
@@ -893,12 +948,18 @@ function generateOutfit(preserveItems){
   const ago3=Date.now()-3*86400000;
   let pool=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions);
 
-  // Office mode filter
+  // ── Pool filtering ─────────────────────────────────────────────────────
+  // Step 1: always respect weekday/weekend flags
+  pool=pool.filter(i=>{
+    if(isWknd) return i.weekendOk!==false;
+    else       return i.weekdayOk!==false;
+  });
+  // Step 2: office mode — if ON, only office-flagged items; if OFF, exclude office-only items
   if(officeModeOn){
-    pool=pool.filter(i=>i.officeOk!==false);
+    pool=pool.filter(i=>i.officeOk===true||i.officeOk===undefined); // include items explicitly marked or unmarked
   }else{
-    // When NOT office mode, exclude items that are office-ONLY
-    // (officeOk:true but weekdayOk/weekendOk might suggest them anyway — we just don't exclude)
+    // Don't exclude items that aren't office-flagged — just don't force office items
+    // Items with officeOk:true are still fine for casual wear unless user opts them out
   }
 
   function score(i){let s=100+Math.random()*15;if(isWknd&&i.weekendOk)s+=20;if(!isWknd&&i.weekdayOk)s+=20;if(i.lastWorn&&new Date(i.lastWorn).getTime()>ago3)s-=40;return s;}
@@ -964,6 +1025,32 @@ function generateOutfit(preserveItems){
   // Socks — skip if sandals
   newO.socks=lockedSlots.socks?currentOutfit.socks:(shoe?.subcategory==='sandals'?null:(sockPool.length?best(sockPool):null));
 
+  // ── ACCESSORIES (only when accessories mode is ON) ─────────────────────
+  if(accessoriesModeOn){
+    const accPool=pool.filter(i=>i.category==='accessories');
+    const sungPool=accPool.filter(i=>i.subcategory==='sunglasses');
+    const headPool=accPool.filter(i=>i.subcategory==='hat'||i.subcategory==='clip');
+
+    // Auto-suggest sunglasses if UV >= 6 (even if no sunglasses in wardrobe, note it)
+    const uvHigh=wxSnapshot&&wxSnapshot.uvIndex>=6;
+    let chosenAcc=null;
+    if(sungPool.length){
+      // Suggest sunglasses when sunny/partlyCloudy or UV high
+      const sunny=['sunny','partlyCloudy'].includes(wxSnapshot?.condition);
+      if(sunny||uvHigh) chosenAcc=lockedSlots.accessory?currentOutfit.accessory:best(sungPool);
+    }
+    // Head accessory (hat XOR clip — pick one, mutually exclusive)
+    if(!chosenAcc&&headPool.length){
+      chosenAcc=lockedSlots.accessory?currentOutfit.accessory:best(headPool);
+    }
+    newO.accessory=chosenAcc||null;
+    // UV prompt stored for render
+    newO._uvSunglassesPrompt=uvHigh&&!sungPool.length;
+  }else{
+    newO.accessory=null;
+    newO._uvSunglassesPrompt=false;
+  }
+
   currentOutfit=newO;renderOutfit();
 }
 
@@ -995,6 +1082,13 @@ function renderOutfit(){
     div.innerHTML=`<button class="lock-btn${locked?' locked':''}" onclick="toggleLock('${slot}')" aria-label="${locked?'Unlock':'Lock'}"><svg viewBox="0 0 24 24">${lockSVG}</svg></button><span class="outfit-item-name">${item.name}</span><span class="badge ${cls}">${sub.label}</span>${blob}`;
     list.appendChild(div);
   });
+  // UV sunglasses prompt (no sunglasses in wardrobe but UV is high)
+  if(currentOutfit._uvSunglassesPrompt){
+    const tip=document.createElement('div');
+    tip.style.cssText='font-size:12px;color:var(--coral);padding:4px 2px;';
+    tip.textContent='🕶 UV is high today — consider adding sunglasses to your wardrobe.';
+    list.appendChild(tip);
+  }
 }
 
 function toggleLock(slot){if(lockedSlots[slot])delete lockedSlots[slot];else lockedSlots[slot]=true;renderOutfit();}
@@ -1124,8 +1218,44 @@ function saveManualLog(){
 
 // ── Feedback ──────────────────────────────────────────────────────────────
 let feedbackLog=null,feedbackItems=[],itemRatings={},overallFeel=null;
+
+function openEditFeedback(log){
+  // Re-open feedback for an existing log, pre-filled with saved ratings
+  const items=DB.items.filter(i=>log.itemIDs.includes(i.id));
+  feedbackLog=log;
+  feedbackItems=items;
+  itemRatings=Object.assign({},log.itemRatings||{});
+  overallFeel=log.overallFeel||null;
+
+  // Update sheet title
+  const titleEl=document.getElementById('feedback-sheet-title');
+  if(titleEl)titleEl.textContent='Edit ratings';
+
+  const c=document.getElementById('feedback-items');c.innerHTML='';
+  items.forEach(item=>{
+    const savedRating=itemRatings[item.id]||null;
+    const b=document.createElement('div');b.className='feedback-block';
+    b.innerHTML=`<div class="feedback-item-name">${item.name}</div><div class="rating-row">
+      <button class="rating-btn rb-hot${savedRating==='tooHot'?' selected':''}"  onclick="setRating('${item.id}','tooHot',this)">Too hot</button>
+      <button class="rating-btn rb-warm${savedRating==='warm'?' selected':''}"   onclick="setRating('${item.id}','warm',this)">Warm</button>
+      <button class="rating-btn rb-ok${savedRating==='justRight'?' selected':''}" onclick="setRating('${item.id}','justRight',this)">Just right</button>
+      <button class="rating-btn rb-cool${savedRating==='cool'?' selected':''}"   onclick="setRating('${item.id}','cool',this)">Cool</button>
+      <button class="rating-btn rb-cold${savedRating==='tooCold'?' selected':''}" onclick="setRating('${item.id}','tooCold',this)">Cold</button>
+    </div>`;
+    c.appendChild(b);
+  });
+  // Pre-select overall feel
+  ['tooHot','warm','great','cool','cold'].forEach(k=>{
+    const el=document.getElementById('ov-'+k);
+    if(el)el.classList.toggle('selected',k===overallFeel);
+  });
+  document.getElementById('sheet-feedback').classList.add('open');
+}
+
 function openFeedback(log,items){
   feedbackLog=log;feedbackItems=items;itemRatings={};overallFeel=null;
+  const titleEl=document.getElementById('feedback-sheet-title');
+  if(titleEl)titleEl.textContent='How was today?';
   const c=document.getElementById('feedback-items');c.innerHTML='';
   items.forEach(item=>{const b=document.createElement('div');b.className='feedback-block';b.innerHTML=`<div class="feedback-item-name">${item.name}</div><div class="rating-row"><button class="rating-btn rb-hot" onclick="setRating('${item.id}','tooHot',this)">Too hot</button><button class="rating-btn rb-warm" onclick="setRating('${item.id}','warm',this)">Warm</button><button class="rating-btn rb-ok" onclick="setRating('${item.id}','justRight',this)">Just right</button><button class="rating-btn rb-cool" onclick="setRating('${item.id}','cool',this)">Cool</button><button class="rating-btn rb-cold" onclick="setRating('${item.id}','tooCold',this)">Cold</button></div>`;c.appendChild(b);});
   ['tooHot','warm','great','cool','cold'].forEach(k=>document.getElementById('ov-'+k).classList.remove('selected'));
@@ -1258,12 +1388,29 @@ function renderHistory(){
     const outer=document.createElement('div');outer.className='log-row';
     outer.innerHTML='<div class="log-delete-bg">Delete</div>';
     const inner=document.createElement('div');inner.className='log-inner';
-    inner.innerHTML=`<div class="log-date">${dateStr}${timeStr}${log.isRetroactive?' <span style="font-size:10px;opacity:.6;">(retroactive)</span>':''}</div><div class="log-items">${log.itemNames}</div>${metaStr?`<div class="log-meta">${metaStr}</div>`:''}${feelHTML}`;
+    inner.innerHTML=`<div class="log-date">${dateStr}${timeStr}${log.isRetroactive?' <span style="font-size:10px;opacity:.6;">(retroactive)</span>':''}</div><div class="log-items">${log.itemNames}</div>${metaStr?`<div class="log-meta">${metaStr}</div>`:''}${feelHTML}<div style="font-size:10px;color:var(--faint);margin-top:4px;">Tap to edit ratings &nbsp;·&nbsp; Swipe left to delete</div>`;
     outer.appendChild(inner);
+    // Tap inner row → open edit feedback sheet pre-populated
+    inner.addEventListener('click',()=>{
+      openEditFeedback(log);
+    });
+    // Swipe left → reveal delete
     let sx=0,cx=0,sw=false;
     inner.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sw=false;},{passive:true});
-    inner.addEventListener('touchmove',e=>{cx=e.touches[0].clientX;const diff=sx-cx;if(diff>10)sw=true;if(sw)inner.style.transform=`translateX(${Math.min(0,-diff)}px)`;},{passive:true});
-    inner.addEventListener('touchend',()=>{const diff=sx-cx;if(diff>70){inner.style.transform='translateX(-80px)';showConfirm('Delete this entry?','This outfit log will be permanently removed.',()=>{DB.logs.splice(idx,1);save();renderHistory();});setTimeout(()=>{inner.style.transform='';},400);}else inner.style.transform='';sw=false;});
+    inner.addEventListener('touchmove',e=>{cx=e.touches[0].clientX;const diff=sx-cx;if(diff>12)sw=true;if(sw)inner.style.transform=`translateX(${Math.min(0,-diff)}px)`;},{passive:true});
+    inner.addEventListener('touchend',()=>{
+      const diff=sx-cx;
+      if(sw&&diff>70){
+        inner.style.transform='translateX(-80px)';
+        showConfirm('Delete this entry?','This outfit log will be permanently removed.',()=>{DB.logs.splice(idx,1);save();renderHistory();});
+        setTimeout(()=>{inner.style.transform='';},400);
+      }else{
+        inner.style.transform='';
+        // Only fire click if it wasn't a swipe attempt
+        if(!sw){}
+      }
+      sw=false;
+    });
     list.appendChild(outer);
   });
 }
@@ -1302,6 +1449,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(DB.prefs.bgColor){document.documentElement.style.setProperty('--bg',DB.prefs.bgColor);document.getElementById('bg-preview-dot').style.background=DB.prefs.bgColor;}
   initColorPicker();
   initOfficeMode();
+  syncAccessoriesToggle();
   renderGreeting();
   generateOutfit();
   initWeather();
