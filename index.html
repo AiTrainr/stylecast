@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="StyleCast">
+<link rel="apple-touch-icon" href="Icon.jpg">
 <meta name="theme-color" content="#FFEDDD">
 <title>StyleCast</title>
 <style>
@@ -72,13 +73,15 @@ body.night-mode #wx-card{background:#2A1F3D;}
 
 /* Mode toggle cards (Office / Accessories) */
 .mode-card{
-  background:var(--card);border-radius:12px;padding:11px 12px;
+  background:var(--card);border-radius:12px;padding:9px 11px;
   border:1.5px solid var(--border);cursor:pointer;
   transition:background .25s,border-color .25s,opacity .15s;
 }
 .mode-card:active{opacity:.75;}
 .mode-card.active{background:rgba(104,199,193,.12);border-color:var(--primary);}
 body.night-mode .mode-card.active{background:rgba(155,127,212,.15);border-color:var(--primary);}
+.mode-card-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.mode-card-label{font-size:12px;font-weight:700;color:var(--text);}
 
 /* Scrollable outfit list */
 #outfit-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
@@ -91,7 +94,7 @@ body.night-mode .mode-card.active{background:rgba(155,127,212,.15);border-color:
 .office-sub{font-size:11px;color:var(--muted);margin-top:1px;}
 
 /* Outfit items - slot order: outerwear, top, bottom, socks, shoes */
-.outfit-item{display:flex;align-items:center;background:var(--card);border-radius:12px;padding:13px 14px;border:0.5px solid var(--border);gap:10px;min-height:58px;transition:background .4s,border-color .4s;}
+.outfit-item{display:flex;align-items:center;background:var(--card);border-radius:10px;padding:9px 12px;border:0.5px solid var(--border);gap:10px;min-height:46px;transition:background .4s,border-color .4s;}
 .outfit-item-name{flex:1;font-size:15px;font-weight:500;}
 .lock-btn{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;opacity:.28;transition:opacity .15s;}
 .lock-btn.locked{opacity:1;}
@@ -149,11 +152,15 @@ body.night-mode .badge-accessories{background:#183040;color:#80C8E8;}
 .pill{white-space:nowrap;padding:7px 15px;border-radius:99px;font-size:13px;font-weight:600;border:0.5px solid var(--sand);background:var(--card);color:var(--text);cursor:pointer;transition:background .15s,color .15s;}
 .pill.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 
-/* Toggle */
+/* Toggle — standard size */
 .toggle{width:50px;height:30px;background:#ccc;border-radius:15px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0;}
 .toggle.on{background:var(--primary);}
 .toggle::after{content:'';position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
 .toggle.on::after{transform:translateX(20px);}
+/* Small toggle variant (mode cards) */
+.toggle[style*="width:40px"]{border-radius:12px;}
+.toggle[style*="width:40px"]::after{width:20px;height:20px;top:2px;left:2px;}
+.toggle[style*="width:40px"].on::after{transform:translateX(16px);}
 
 /* List items */
 .list-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:12px 14px;border:0.5px solid var(--border);cursor:pointer;transition:background .4s,border-color .4s;}
@@ -300,20 +307,22 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
   <!-- Office + Accessories toggles side by side -->
   <div style="display:flex;gap:8px;">
     <div class="mode-card" id="office-card" onclick="toggleOfficeMode()" style="flex:1;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <span style="font-size:18px;">💼</span>
-        <button class="toggle" id="office-toggle" onclick="event.stopPropagation();toggleOfficeMode()"></button>
+      <div class="mode-card-inner">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:16px;line-height:1;">💼</span>
+          <span class="mode-card-label">Office day</span>
+        </div>
+        <button class="toggle" id="office-toggle" onclick="event.stopPropagation();toggleOfficeMode()" style="width:40px;height:24px;"></button>
       </div>
-      <div style="font-size:13px;font-weight:700;margin-top:6px;">Office day</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="office-sub">Off</div>
     </div>
     <div class="mode-card" id="acc-card" onclick="toggleAccessoriesMode()" style="flex:1;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <span style="font-size:18px;">🕶</span>
-        <button class="toggle" id="acc-toggle" onclick="event.stopPropagation();toggleAccessoriesMode()"></button>
+      <div class="mode-card-inner">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:16px;line-height:1;">🕶</span>
+          <span class="mode-card-label">Accessories</span>
+        </div>
+        <button class="toggle" id="acc-toggle" onclick="event.stopPropagation();toggleAccessoriesMode()" style="width:40px;height:24px;"></button>
       </div>
-      <div style="font-size:13px;font-weight:700;margin-top:6px;">Accessories</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="acc-sub">Off</div>
     </div>
   </div>
   <!-- Outfit header with temp basis -->
@@ -495,6 +504,11 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
       <button class="sheet-close" onclick="closeFeedback()">Skip</button>
     </div>
     <div class="sheet-body">
+      <div id="feedback-time-row" style="display:none;">
+        <div class="form-label" style="margin-bottom:5px;">Time worn (optional)</div>
+        <input type="time" class="date-select" id="feedback-time-input" style="width:130px;">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Set if you want to log a specific time, e.g. a morning outfit before changing later.</div>
+      </div>
       <div style="font-size:13px;color:var(--muted);">Rate each item's warmth</div>
       <div id="feedback-items"></div>
       <div class="feedback-block">
@@ -704,9 +718,8 @@ function toggleOfficeMode(){
 function syncOfficeToggle(){
   const btn=document.getElementById('office-toggle');
   const card=document.getElementById('office-card');
-  btn.className='toggle'+(officeModeOn?' on':'');
-  card.classList.toggle('active',officeModeOn);
-  document.getElementById('office-sub').textContent=officeModeOn?'Work outfits only':'Off';
+  if(btn)btn.className='toggle'+(officeModeOn?' on':'');
+  if(card)card.classList.toggle('active',officeModeOn);
 }
 function toggleAccessoriesMode(){
   accessoriesModeOn=!accessoriesModeOn;
@@ -716,9 +729,8 @@ function toggleAccessoriesMode(){
 function syncAccessoriesToggle(){
   const btn=document.getElementById('acc-toggle');
   const card=document.getElementById('acc-card');
-  btn.className='toggle'+(accessoriesModeOn?' on':'');
-  card.classList.toggle('active',accessoriesModeOn);
-  document.getElementById('acc-sub').textContent=accessoriesModeOn?'On':'Off';
+  if(btn)btn.className='toggle'+(accessoriesModeOn?' on':'');
+  if(card)card.classList.toggle('active',accessoriesModeOn);
 }
 
 // ── Temp basis ────────────────────────────────────────────────────────────
@@ -949,17 +961,17 @@ function generateOutfit(preserveItems){
   let pool=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions);
 
   // ── Pool filtering ─────────────────────────────────────────────────────
-  // Step 1: always respect weekday/weekend flags
-  pool=pool.filter(i=>{
-    if(isWknd) return i.weekendOk!==false;
-    else       return i.weekdayOk!==false;
-  });
-  // Step 2: office mode — if ON, only office-flagged items; if OFF, exclude office-only items
+  // When office mode is ON: skip weekday/weekend gates (user explicitly chose work mode)
+  // When office mode is OFF: always respect weekday/weekend flags
+  if(!officeModeOn){
+    pool=pool.filter(i=>{
+      if(isWknd) return i.weekendOk!==false;
+      else       return i.weekdayOk!==false;
+    });
+  }
+  // Office mode filter
   if(officeModeOn){
-    pool=pool.filter(i=>i.officeOk===true||i.officeOk===undefined); // include items explicitly marked or unmarked
-  }else{
-    // Don't exclude items that aren't office-flagged — just don't force office items
-    // Items with officeOk:true are still fine for casual wear unless user opts them out
+    pool=pool.filter(i=>i.officeOk===true||i.officeOk===undefined);
   }
 
   function score(i){let s=100+Math.random()*15;if(isWknd&&i.weekendOk)s+=20;if(!isWknd&&i.weekdayOk)s+=20;if(i.lastWorn&&new Date(i.lastWorn).getTime()>ago3)s-=40;return s;}
@@ -1100,6 +1112,11 @@ function logOutfit(){
 
 // dateISO: ISO string, isRetroactive: bool (no current weather attached)
 function _doLog(pieces,dateISO,isRetroactive){
+  // Track outfit combo re-wears
+  const comboKey=pieces.map(i=>i.id).sort().join('|');
+  if(!DB.prefs.outfitCombos)DB.prefs.outfitCombos={};
+  DB.prefs.outfitCombos[comboKey]=(DB.prefs.outfitCombos[comboKey]||0)+1;
+
   const log={
     id:uid(),date:dateISO,
     itemIDs:pieces.map(i=>i.id),itemNames:pieces.map(i=>i.name).join(', '),
@@ -1108,6 +1125,7 @@ function _doLog(pieces,dateISO,isRetroactive){
     loF:wxSnapshot?Math.round(wxSnapshot.loF??wxSnapshot.tempF):null,
     condition:(!isRetroactive&&wxSnapshot)?wxSnapshot.condition:null,
     overallFeel:null,itemRatings:{},isRetroactive:isRetroactive||false,
+    comboCount:DB.prefs.outfitCombos[comboKey],
   };
   DB.logs.unshift(log);DB.logs.sort((a,b)=>new Date(b.date)-new Date(a.date));
   pieces.forEach(i=>{i.lastWorn=dateISO;i.timesWorn=(i.timesWorn||0)+1;});
@@ -1230,6 +1248,17 @@ function openEditFeedback(log){
   // Update sheet title
   const titleEl=document.getElementById('feedback-sheet-title');
   if(titleEl)titleEl.textContent='Edit ratings';
+  // Show time picker for retroactive edits
+  const timeRow=document.getElementById('feedback-time-row');
+  const timeInput=document.getElementById('feedback-time-input');
+  if(timeRow){timeRow.style.display='block';}
+  if(timeInput){
+    // Pre-fill with current log time
+    const d=new Date(log.date);
+    const hh=String(d.getHours()).padStart(2,'0');
+    const mm=String(d.getMinutes()).padStart(2,'0');
+    timeInput.value=`${hh}:${mm}`;
+  }
 
   const c=document.getElementById('feedback-items');c.innerHTML='';
   items.forEach(item=>{
@@ -1256,6 +1285,8 @@ function openFeedback(log,items){
   feedbackLog=log;feedbackItems=items;itemRatings={};overallFeel=null;
   const titleEl=document.getElementById('feedback-sheet-title');
   if(titleEl)titleEl.textContent='How was today?';
+  const timeRow=document.getElementById('feedback-time-row');
+  if(timeRow)timeRow.style.display='none';
   const c=document.getElementById('feedback-items');c.innerHTML='';
   items.forEach(item=>{const b=document.createElement('div');b.className='feedback-block';b.innerHTML=`<div class="feedback-item-name">${item.name}</div><div class="rating-row"><button class="rating-btn rb-hot" onclick="setRating('${item.id}','tooHot',this)">Too hot</button><button class="rating-btn rb-warm" onclick="setRating('${item.id}','warm',this)">Warm</button><button class="rating-btn rb-ok" onclick="setRating('${item.id}','justRight',this)">Just right</button><button class="rating-btn rb-cool" onclick="setRating('${item.id}','cool',this)">Cool</button><button class="rating-btn rb-cold" onclick="setRating('${item.id}','tooCold',this)">Cold</button></div>`;c.appendChild(b);});
   ['tooHot','warm','great','cool','cold'].forEach(k=>document.getElementById('ov-'+k).classList.remove('selected'));
@@ -1267,7 +1298,19 @@ function saveFeedback(){
   const d={tooHot:-0.5,warm:-0.25,justRight:0,cool:0.25,tooCold:0.5};
   feedbackItems.forEach(item=>{const r=itemRatings[item.id];if(r&&d[r]!==0){item.effectiveWarmth=Math.min(5,Math.max(1,(item.effectiveWarmth||item.warmth||3)+d[r]*0.3));item.feedbackCount=(item.feedbackCount||0)+1;}});
   if(overallFeel){const sh={tooHot:-1,warm:-0.5,great:0,cool:0.5,cold:1}[overallFeel]||0;if(sh!==0)DB.prefs.offset=Math.min(5,Math.max(-5,(DB.prefs.offset||0)+sh*0.2));DB.prefs.feedbackCount=(DB.prefs.feedbackCount||0)+1;feedbackLog.overallFeel=overallFeel;}
-  feedbackLog.itemRatings=itemRatings;const idx=DB.logs.findIndex(l=>l.id===feedbackLog.id);if(idx>=0)DB.logs[idx]=feedbackLog;
+  feedbackLog.itemRatings=itemRatings;
+  // Apply time edit if the time field was visible and has a value
+  const timeRow=document.getElementById('feedback-time-row');
+  const timeInput=document.getElementById('feedback-time-input');
+  if(timeRow&&timeRow.style.display!=='none'&&timeInput&&timeInput.value){
+    const existingDate=new Date(feedbackLog.date);
+    const[hh,mm]=timeInput.value.split(':').map(Number);
+    existingDate.setHours(hh,mm,0,0);
+    feedbackLog.date=existingDate.toISOString();
+  }
+  const idx=DB.logs.findIndex(l=>l.id===feedbackLog.id);
+  if(idx>=0)DB.logs[idx]=feedbackLog;
+  DB.logs.sort((a,b)=>new Date(b.date)-new Date(a.date));
   save();document.getElementById('sheet-feedback').classList.remove('open');renderHistory();
 }
 function closeFeedback(){document.getElementById('sheet-feedback').classList.remove('open');}
@@ -1288,9 +1331,13 @@ function renderWardrobe(){
   items.forEach(item=>{
     const sub=subByKey(item.subcategory);const cls=badgeCls(item);
     const blob=item.color?`<span class="color-blob" style="background:${item.color};"></span>`:'';
-    const officeDot=item.officeOk!==false?'<span style="font-size:11px;margin-left:3px;">💼</span>':'';
+    const officeDot=item.officeOk===true?'<span style="font-size:10px;margin-left:3px;opacity:.6;">💼</span>':'';
+    const wearCount=item.timesWorn||0;
+    const wearBadge=wearCount>0
+      ?`<span style="font-size:10px;font-weight:600;color:var(--faint);min-width:28px;text-align:right;">${wearCount}×</span>`
+      :'';
     const div=document.createElement('div');div.className='list-item';
-    div.innerHTML=`<div><div class="item-name">${item.name}${officeDot}</div><div class="item-sub">${sub.label}</div></div><div class="item-right"><span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
+    div.innerHTML=`<div style="flex:1;min-width:0;"><div class="item-name">${item.name}${officeDot}</div><div class="item-sub">${sub.label}</div></div><div class="item-right">${wearBadge}<span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
     div.onclick=()=>openEditItem(item);list.appendChild(div);
   });
 }
