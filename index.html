@@ -1060,7 +1060,9 @@ function saveBgAsCustom(){
 }
 
 function openBgColorPicker(){
-  bgTab='day';
+  // Auto-select the relevant tab based on current mode
+  const isNight=document.body.classList.contains('night-mode');
+  bgTab=isNight?'night':'day';
   if(!DB.prefs.customColors)DB.prefs.customColors={day:[],night:[]};
   // Wire up canvas drag (idempotent via _wheelWired flag)
   attachWheelEvents('bg-color-canvas',true);
@@ -1069,12 +1071,10 @@ function openBgColorPicker(){
 }
 
 function closeBgSheet(){
-  // Restore correct day/night color (in case user previewed but didn't apply)
+  // Re-apply the correctly stored color for the current mode
+  // This handles the case where user previewed but didn't apply
   applyStoredColors();
-  const dayDot=document.getElementById('bg-day-dot');
-  const nightDot=document.getElementById('bg-night-dot');
-  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#968EAF';
+  syncBgDots();
   closeSheet('sheet-bg-color');
 }
 
