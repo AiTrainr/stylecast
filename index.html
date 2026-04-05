@@ -31,7 +31,7 @@ body.night-mode{
 html,body{height:100%;overflow:hidden;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;background:var(--bg);color:var(--text);transition:background .8s,color .4s;}
 #app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;padding-top:var(--safe-top);}
-.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(75px + var(--safe-bot));min-height:0;}
+.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(68px + var(--safe-bot));min-height:0;}
 .screen.active{display:flex;flex-direction:column;gap:10px;}
 
 /* Nav */
@@ -349,6 +349,10 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
   <div id="no-outfit-log-btn" style="display:none;">
     <button id="btn-log-own-empty" onclick="openManualLog(null,true)">📋 &nbsp;Pick today's outfit</button>
   </div>
+  <!-- Laundry reset -->
+  <div id="laundry-reset-row" style="text-align:center;padding-top:2px;">
+    <button onclick="laundryReset()" style="background:none;border:none;font-size:12px;color:var(--faint);cursor:pointer;padding:4px 8px;text-decoration:underline;text-underline-offset:3px;">🧺 Laundry done — reset cycle</button>
+  </div>
 </div>
 
 <!-- WARDROBE -->
@@ -401,8 +405,14 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
       <button id="unit-c-btn" onclick="setTempUnit('C')" class="btn btn-secondary" style="font-size:13px;padding:9px 0;">Metric (°C)</button>
     </div>
   </div>
-  <div class="card" style="margin-top:4px;">
-    <div class="card-title">Personal temp offset</div>
+  <div class="card" style="margin-top:0;">
+    <div class="card-title">Laundry cycle</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Items worn won't be suggested again for this many days. Tap "Laundry done" on the Today screen to reset.</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <input type="range" id="laundry-slider" min="1" max="14" step="1" value="7" style="flex:1;" oninput="updateLaundryCycle(this.value)">
+      <span id="laundry-label" style="font-size:15px;font-weight:700;min-width:52px;text-align:right;">7 days</span>
+    </div>
+  </div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Adjust if you run hot or cold. Positive = you run cold.</div>
     <div style="display:flex;align-items:center;gap:12px;">
       <input type="range" id="offset-slider" min="-5" max="5" step="1" value="0" style="flex:1;" oninput="updateOffset(this.value)">
@@ -914,21 +924,15 @@ function buildBgSwatches(){
     {hex:'#F5EAF0',name:'Dusty Rose'},
     {hex:'#EEE8F5',name:'Lavender Haze'},
     {hex:'#E8F0EE',name:'Sea Glass'},
-    {hex:'#FFF8E8',name:'Honeydew'},
-    {hex:'#E8EAF0',name:'Slate Mist'},
-    {hex:'#F5EDE0',name:'Almond'},
   ];
   const nightPresets=[
-    {hex:'#2D1F4A',name:'Muted Purple'},
-    {hex:'#1E2A3A',name:'Slate Night'},
-    {hex:'#1A2420',name:'Forest Dark'},
-    {hex:'#2A1A2E',name:'Plum Dusk'},
-    {hex:'#1E1E2E',name:'Deep Navy'},
-    {hex:'#2A2018',name:'Dark Oak'},
-    {hex:'#1A2030',name:'Midnight Blue'},
-    {hex:'#251828',name:'Wine Dark'},
-    {hex:'#1E2820',name:'Dark Sage'},
-    {hex:'#2C2040',name:'Violet Dusk'},
+    {hex:'#7B5E7A',name:'Dusk Plum'},
+    {hex:'#4C6A82',name:'Storm Blue'},
+    {hex:'#5B547A',name:'Twilight'},
+    {hex:'#968EAF',name:'Soft Lavender'},
+    {hex:'#465892',name:'Deep Indigo'},
+    {hex:'#ABAAC0',name:'Silver Dusk'},
+    {hex:'#8090B0',name:'Slate Blue'},
   ];
   const presets=bgTab==='day'?dayPresets:nightPresets;
   presets.forEach(({hex,name})=>{
@@ -1118,8 +1122,10 @@ function updateWxCard(wx){
   if(wx.uvIndex>=6)alerts.push(`🕶 UV ${Math.round(wx.uvIndex)}`);
   const alertEl=document.getElementById('wx-alerts');
   if(alertEl){alertEl.textContent=alerts.join('  ');alertEl.style.display=alerts.length?'block':'none';}
-  const now=new Date(),day=now.getDate(),d2=day%10,exc=[11,12,13];
-  const sfx=exc.includes(day%100)?'th':(['th','st','nd','rd'][Math.min(d2,3)]||'th');
+  const now=new Date(),day=now.getDate();
+  const exc=[11,12,13]; // these always get 'th' regardless of last digit
+  const lastDigit=day%10;
+  const sfx=exc.includes(day%100)?'th':lastDigit===1?'st':lastDigit===2?'nd':lastDigit===3?'rd':'th';
   document.getElementById('wx-date-loc').textContent=`${now.toLocaleDateString('en-US',{weekday:'long'})}, ${now.toLocaleDateString('en-US',{month:'long'})} ${day}${sfx} ${now.getFullYear()}`;
   const feelEl=document.getElementById('wx-feel');
   feelEl.textContent=fc.label;
@@ -1137,28 +1143,40 @@ function warmthMin(t){return t>=75?1:t>=60?1:t>=45?2:3;}
 function generateOutfit(preserveItems){
   const tempF=getEffectiveTemp();
   const isWknd=[0,6].includes(new Date().getDay());
-  const ago3=Date.now()-3*86400000;
+  const laundryCycleDays=DB.prefs.laundryCycleDays??7;
+  const laundryCutoff=Date.now()-laundryCycleDays*86400000;
+
+  // Hard-exclude items worn within the laundry cycle window
+  // (unless it's the only option in a category — handled by best() fallback)
   let pool=DB.items.filter(i=>!i.isArchived&&!i.excludeFromSuggestions);
 
   // ── Pool filtering ─────────────────────────────────────────────────────
-  // When office mode is ON: skip weekday/weekend gates (user explicitly chose work mode)
-  // When office mode is OFF: always respect weekday/weekend flags
   if(!officeModeOn){
     pool=pool.filter(i=>{
       if(isWknd) return i.weekendOk!==false;
       else       return i.weekdayOk!==false;
     });
   }
-  // Office mode filter
   if(officeModeOn){
     pool=pool.filter(i=>i.officeOk===true||i.officeOk===undefined);
   }
+  // Laundry cycle: remove items worn too recently
+  // Keep a "dirtyPool" so we can fall back if a category is fully in the laundry
+  const dirtyPool=pool;
+  pool=pool.filter(i=>!i.lastWorn||new Date(i.lastWorn).getTime()<=laundryCutoff);
 
-  function score(i){let s=100+Math.random()*15;if(isWknd&&i.weekendOk)s+=20;if(!isWknd&&i.weekdayOk)s+=20;if(i.lastWorn&&new Date(i.lastWorn).getTime()>ago3)s-=40;return s;}
-  function best(arr){
-    if(preserveItems){return arr.sort((a,b)=>score(b)-score(a))[0]||null;}
-    const ex=new Set(usedIDs);const c=arr.filter(i=>!ex.has(i.id));
-    if(!c.length){arr.forEach(i=>{usedIDs=usedIDs.filter(id=>id!==i.id);});return arr.sort((a,b)=>score(b)-score(a))[0]||null;}
+  function score(i){let s=100+Math.random()*15;if(isWknd&&i.weekendOk)s+=20;if(!isWknd&&i.weekdayOk)s+=20;if(i.lastWorn&&new Date(i.lastWorn).getTime()>laundryCutoff)s-=40;return s;}
+  function best(arr,fallbackArr){
+    // arr = clean items for this slot, fallbackArr = includes dirty items (fallback if all in laundry)
+    if(preserveItems){const src=arr.length?arr:(fallbackArr||arr);return src.sort((a,b)=>score(b)-score(a))[0]||null;}
+    const ex=new Set(usedIDs);
+    let c=arr.filter(i=>!ex.has(i.id));
+    if(!c.length&&arr.length){arr.forEach(i=>{usedIDs=usedIDs.filter(id=>id!==i.id);});c=arr;}
+    if(!c.length&&fallbackArr){
+      // All clean items exhausted AND everything is in laundry — use dirty fallback
+      const fc=fallbackArr.filter(i=>!ex.has(i.id));
+      return (fc.length?fc:fallbackArr).sort((a,b)=>score(b)-score(a))[0]||null;
+    }
     return c.sort((a,b)=>score(b)-score(a))[0]||null;
   }
 
@@ -1169,53 +1187,51 @@ function generateOutfit(preserveItems){
   // We build a scored pool but guarantee something is picked if any top exists.
 
   const allShirts=pool.filter(i=>i.category==='tops'&&i.subcategory!=='dress');
+  const allShirtsDirty=dirtyPool.filter(i=>i.category==='tops'&&i.subcategory!=='dress');
 
-  // Preferred shirts for this temperature
   const preferredShirts=allShirts.filter(i=>{
     if(i.subcategory==='tankTop')    return tempF>=68;
     if(i.subcategory==='shortSleeve')return tempF>=50;
-    return true; // longSleeve always preferred in any temp
+    return true;
   });
+  const preferredShirtsDirty=allShirtsDirty.filter(i=>{
+    if(i.subcategory==='tankTop')    return tempF>=68;
+    if(i.subcategory==='shortSleeve')return tempF>=50;
+    return true;
+  });
+  const shirtPool=preferredShirts.length>0?preferredShirts:allShirts;
+  const shirtPoolDirty=preferredShirtsDirty.length>0?preferredShirtsDirty:allShirtsDirty;
 
-  // Fallback: if nothing passes the temp filter, use ANY shirt
-  // (e.g. only short sleeves in wardrobe but it's cold — still suggest one)
-  const shirtPool=preferredShirts.length>0 ? preferredShirts : allShirts;
-
-  // ── DRESS (replaces shirt+bottom combo) ────────────────────────────────
   const dressPool=pool.filter(i=>i.subcategory==='dress'&&tempF>=50);
+  const dressPoolDirty=dirtyPool.filter(i=>i.subcategory==='dress'&&tempF>=50);
 
-  // ── OUTERWEAR (layered OVER the shirt, only when cold) ─────────────────
-  const outerPool=tempF<65
-    ? pool.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF))
-    : [];
+  const outerPool=tempF<65?pool.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF)):[];
+  const outerPoolDirty=tempF<65?dirtyPool.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF)):[];
 
   const botPool=pool.filter(i=>i.category==='bottoms').filter(i=>i.subcategory==='shorts'?tempF>=65:true);
+  const botPoolDirty=dirtyPool.filter(i=>i.category==='bottoms').filter(i=>i.subcategory==='shorts'?tempF>=65:true);
   const shoePool=pool.filter(i=>i.category==='shoes');
+  const shoePoolDirty=dirtyPool.filter(i=>i.category==='shoes');
   const sockPool=pool.filter(i=>i.category==='socks');
+  const sockPoolDirty=dirtyPool.filter(i=>i.category==='socks');
 
   const newO={};
 
-  // Decide shirt vs dress — only use dress if NO shirts are available
-  const bestShirt=best([...shirtPool]);
-  const bestDress=best([...dressPool]);
+  const bestShirt=best(shirtPool,shirtPoolDirty);
+  const bestDress=best(dressPool,dressPoolDirty);
 
   if(!bestShirt&&bestDress){
     newO.top=lockedSlots.top?currentOutfit.top:bestDress;
   }else{
-    // Always pick a shirt. If pool is empty, slot is empty (but we tried).
     newO.top=lockedSlots.top?currentOutfit.top:bestShirt;
   }
 
   const isDress=(newO.top?.subcategory==='dress');
 
-  // Outerwear — separate slot, layered over shirt
-  newO.outerwear=lockedSlots.outerwear?currentOutfit.outerwear:(outerPool.length?best(outerPool):null);
-  // Bottom — skip if dress
-  newO.bottom=lockedSlots.bottom?currentOutfit.bottom:(isDress?null:best(botPool));
-  // Shoes
-  const shoe=lockedSlots.shoes?currentOutfit.shoes:best(shoePool);newO.shoes=shoe;
-  // Socks — skip if sandals
-  newO.socks=lockedSlots.socks?currentOutfit.socks:(shoe?.subcategory==='sandals'?null:(sockPool.length?best(sockPool):null));
+  newO.outerwear=lockedSlots.outerwear?currentOutfit.outerwear:(outerPool.length||outerPoolDirty.length?best(outerPool,outerPoolDirty):null);
+  newO.bottom=lockedSlots.bottom?currentOutfit.bottom:(isDress?null:best(botPool,botPoolDirty));
+  const shoe=lockedSlots.shoes?currentOutfit.shoes:best(shoePool,shoePoolDirty);newO.shoes=shoe;
+  newO.socks=lockedSlots.socks?currentOutfit.socks:(shoe?.subcategory==='sandals'?null:(sockPool.length||sockPoolDirty.length?best(sockPool,sockPoolDirty):null));
 
   // ── ACCESSORIES (only when accessories mode is ON) ─────────────────────
   if(accessoriesModeOn){
@@ -1671,18 +1687,35 @@ function setTempUnit(unit){
   if(oLabel){const v=DB.prefs.offset||0;oLabel.textContent=`${v>=0?'+':''}${v}${unitStr()}`;}
   if(wxSnapshot)updateWxCard(wxSnapshot);
 }
+function laundryReset(){
+  // Clear lastWorn on all items — puts everything back in rotation
+  DB.items.forEach(i=>{ i.lastWorn=null; });
+  save();
+  generateOutfit();
+  // Brief confirmation
+  const btn=document.querySelector('[onclick="laundryReset()"]');
+  if(btn){const orig=btn.textContent;btn.textContent='✓ Clothes back in rotation!';setTimeout(()=>{btn.textContent=orig;},2500);}
+}
+function updateLaundryCycle(val){
+  DB.prefs.laundryCycleDays=parseInt(val);
+  const lbl=document.getElementById('laundry-label');
+  if(lbl)lbl.textContent=val+' day'+(val==='1'?'':'s');
+  save();
+  generateOutfit();
+}
 function saveName(){DB.prefs.name=document.getElementById('name-input').value.trim();save();renderGreeting();}
 function updateBackupStatus(){const el=document.getElementById('backup-status');if(el)el.textContent=`${DB.items.filter(i=>!i.isArchived).length} items · ${DB.logs.length} logs`;}
 function updateSettingsCounts(){
   const a=document.getElementById('archive-count');if(a)a.textContent=`${DB.items.filter(i=>i.isArchived).length} archived items`;
   const sl=document.getElementById('offset-slider');
   if(sl){sl.value=DB.prefs.offset||0;const v=DB.prefs.offset||0;document.getElementById('offset-label').textContent=`${v>=0?'+':''}${v}${unitStr()}`;}
+  const ls=document.getElementById('laundry-slider');
+  const ll=document.getElementById('laundry-label');
+  if(ls&&ll){const d=DB.prefs.laundryCycleDays??7;ls.value=d;ll.textContent=d+' day'+(d===1?'':'s');}
   updateBackupStatus();
-  // Sync unit buttons
   setTempUnit(DB.prefs.tempUnit||'F');
-  // Sync bg preview dots
   const dayDot=document.getElementById('bg-day-dot');const nightDot=document.getElementById('bg-night-dot');
-  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||DB.prefs.bgColor||'#FFEDDD';
+  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
   if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
 }
 function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}${unitStr()}`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit(true);}
