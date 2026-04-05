@@ -32,6 +32,7 @@ html,body{height:100%;overflow:hidden;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-size:16px;background:var(--bg);color:var(--text);transition:background .8s,color .4s;}
 #app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;padding-top:var(--safe-top);}
 .screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(68px + var(--safe-bot));min-height:0;}
+#screen-settings{padding-bottom:calc(68px + var(--safe-bot));}
 .screen.active{display:flex;flex-direction:column;gap:10px;}
 
 /* Nav */
@@ -350,8 +351,8 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
     <button id="btn-log-own-empty" onclick="openManualLog(null,true)">📋 &nbsp;Pick today's outfit</button>
   </div>
   <!-- Laundry reset -->
-  <div id="laundry-reset-row" style="text-align:center;padding-top:2px;">
-    <button onclick="laundryReset()" style="background:none;border:none;font-size:12px;color:var(--faint);cursor:pointer;padding:4px 8px;text-decoration:underline;text-underline-offset:3px;">🧺 Laundry done — reset cycle</button>
+  <div id="laundry-reset-row" style="padding-top:4px;">
+    <button id="laundry-btn" onclick="laundryReset()" style="width:100%;background:var(--surface);color:var(--muted);border:1.5px solid var(--sand);font-size:13px;font-weight:600;padding:10px 16px;border-radius:12px;cursor:pointer;transition:opacity .15s;">🧺 Laundry done — reset cycle</button>
   </div>
 </div>
 
@@ -368,6 +369,10 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
 <!-- HISTORY -->
 <div id="screen-history" class="screen">
   <div class="page-header"><div class="page-title">History</div></div>
+  <div style="display:flex;gap:8px;flex-shrink:0;">
+    <button class="btn btn-primary" id="hist-tab-log"  onclick="setHistTab('log')"  style="font-size:13px;padding:9px 0;">📋 Log</button>
+    <button class="btn btn-secondary" id="hist-tab-fav" onclick="setHistTab('fav')"  style="font-size:13px;padding:9px 0;">⭐ Favourites</button>
+  </div>
   <div id="history-list" style="display:flex;flex-direction:column;gap:8px;"></div>
 </div>
 
@@ -393,7 +398,7 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
     <div><div class="settings-row-title">App background colour</div><div class="settings-row-sub">Day &amp; night, custom colours</div></div>
     <div style="display:flex;align-items:center;gap:6px;">
       <div id="bg-day-dot"   style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#FFEDDD;"></div>
-      <div id="bg-night-dot" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#2D1F4A;"></div>
+      <div id="bg-night-dot" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);background:#968EAF;"></div>
       <span style="color:var(--faint);font-size:18px;">›</span>
     </div>
   </div>
@@ -510,6 +515,16 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
         <div class="toggle-row">
           <span class="toggle-label">Office / work appropriate</span>
           <button class="toggle on" id="toggle-office" onclick="toggleField('office')"></button>
+        </div>
+      </div>
+      <!-- Season tag -->
+      <div class="form-group">
+        <div class="form-label">Season <span style="font-size:11px;color:var(--faint);font-weight:400;">(leave blank = all year)</span></div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;" id="season-chips">
+          <button class="type-chip" data-season="spring" onclick="toggleSeason(this,'spring')">🌸 Spring</button>
+          <button class="type-chip" data-season="summer" onclick="toggleSeason(this,'summer')">☀️ Summer</button>
+          <button class="type-chip" data-season="fall"   onclick="toggleSeason(this,'fall')">🍂 Fall</button>
+          <button class="type-chip" data-season="winter" onclick="toggleSeason(this,'winter')">❄️ Winter</button>
         </div>
       </div>
       <button class="btn btn-primary" id="item-save-btn" onclick="saveItem()" style="border:1.5px solid rgba(0,0,0,.08);">Save Item</button>
@@ -730,7 +745,7 @@ function badgeCls(item){return item.subcategory==='dress'?'badge-dress':'badge-'
 // ── Day / Night ───────────────────────────────────────────────────────────
 function applyTimeOfDay(){
   const h=new Date().getHours();
-  document.body.classList.toggle('night-mode',(h>=20||h<6));
+  document.body.classList.toggle('night-mode',(h>=19||h<6));
   applyStoredColors();
 }
 
@@ -830,6 +845,9 @@ function buildItemSwatches(){
 
 function rgbToHex(r,g,b){return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
 
+// Track cursor position on each canvas
+const wheelCursors={};
+
 function drawColorWheel(canvasId,brightness){
   const canvas=document.getElementById(canvasId);if(!canvas)return;
   const ctx=canvas.getContext('2d'),sz=canvas.width,cx=sz/2,cy=sz/2,r=sz/2-2;
@@ -844,20 +862,63 @@ function drawColorWheel(canvasId,brightness){
   ctx.globalCompositeOperation='destination-in';
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
   ctx.globalCompositeOperation='source-over';
+  // Draw cursor if we have a position
+  const cur=wheelCursors[canvasId];
+  if(cur)drawWheelCursor(ctx,cur.x,cur.y);
 }
 
-function pickFromCanvas(e,canvasId,isBg){
-  const canvas=document.getElementById(canvasId);if(!canvas)return;
+function drawWheelCursor(ctx,x,y){
+  ctx.save();
+  ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+  ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1;ctx.stroke();
+  ctx.restore();
+}
+
+function getCanvasXY(e,canvas){
   const rect=canvas.getBoundingClientRect();
   const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
-  const cx=e.touches?e.touches[0].clientX:e.clientX;
-  const cy=e.touches?e.touches[0].clientY:e.clientY;
-  const x=Math.round((cx-rect.left)*sx),y=Math.round((cy-rect.top)*sy);
+  const clientX=e.touches?e.touches[0].clientX:(e.clientX);
+  const clientY=e.touches?e.touches[0].clientY:(e.clientY);
+  return{x:Math.round((clientX-rect.left)*sx),y:Math.round((clientY-rect.top)*sy)};
+}
+
+function sampleCanvas(canvas,x,y,canvasId,isBg){
   const px=canvas.getContext('2d').getImageData(x,y,1,1).data;
   if(px[3]<10)return;
   const hex=rgbToHex(px[0],px[1],px[2]);
-  if(isBg){pickedBgColor=hex;syncBgColorPreview();}
-  else{pickedColor=hex;syncItemColorPreview();document.getElementById('color-swatches').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));}
+  wheelCursors[canvasId]={x,y};
+  const brightness=canvasId==='color-canvas'?itemBrightnessVal:bgBrightnessVal;
+  drawColorWheel(canvasId,brightness);
+  if(isBg){
+    pickedBgColor=hex;syncBgColorPreview();previewBgLive(hex);
+  }else{
+    pickedColor=hex;syncItemColorPreview();
+    document.getElementById('color-swatches')?.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  }
+}
+
+function attachWheelEvents(canvasId,isBg){
+  const canvas=document.getElementById(canvasId);if(!canvas||canvas._wheelWired)return;
+  canvas._wheelWired=true;
+  let dragging=false;
+  function onMove(e){
+    if(!dragging)return;
+    e.preventDefault();
+    const{x,y}=getCanvasXY(e,canvas);
+    sampleCanvas(canvas,x,y,canvasId,isBg);
+  }
+  canvas.addEventListener('pointerdown',e=>{
+    dragging=true;canvas.setPointerCapture(e.pointerId);
+    const{x,y}=getCanvasXY(e,canvas);
+    sampleCanvas(canvas,x,y,canvasId,isBg);
+  });
+  canvas.addEventListener('pointermove',e=>{if(dragging){e.preventDefault();const{x,y}=getCanvasXY(e,canvas);sampleCanvas(canvas,x,y,canvasId,isBg);}},{passive:false});
+  canvas.addEventListener('pointerup',()=>{dragging=false;});
+  canvas.addEventListener('pointercancel',()=>{dragging=false;});
+  // Touch fallback for older iOS
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();const{x,y}=getCanvasXY(e,canvas);sampleCanvas(canvas,x,y,canvasId,isBg);},{passive:false});
 }
 
 function onBrightnessChange(canvasId,sliderId){
@@ -882,8 +943,7 @@ function syncBgColorPreview(){
 function initColorPicker(){
   buildItemSwatches();
   drawColorWheel('color-canvas',itemBrightnessVal);syncItemColorPreview();
-  const c=document.getElementById('color-canvas');
-  if(c){c.addEventListener('click',e=>pickFromCanvas(e,'color-canvas',false));c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'color-canvas',false);},{passive:false});}
+  attachWheelEvents('color-canvas',false);
 }
 
 // ── Hex input ──────────────────────────────────────────────────────────
@@ -907,7 +967,7 @@ function setBgTab(tab){
   if(titleEl)titleEl.textContent=tab==='day'?'Day Background':'Night Background';
   // Load current color for this tab
   const key=tab==='day'?'bgColorDay':'bgColorNight';
-  const defaults={bgColorDay:'#FFEDDD',bgColorNight:'#2D1F4A'};
+  const defaults={bgColorDay:'#FFEDDD',bgColorNight:'#968EAF'};
   pickedBgColor=DB.prefs[key]||defaults[key];
   buildBgSwatches();
   buildCustomChips();
@@ -1002,13 +1062,8 @@ function saveBgAsCustom(){
 function openBgColorPicker(){
   bgTab='day';
   if(!DB.prefs.customColors)DB.prefs.customColors={day:[],night:[]};
-  // Wire up canvas once
-  const c=document.getElementById('bg-color-canvas');
-  if(c&&!c._wired){
-    c.addEventListener('click',e=>pickFromCanvas(e,'bg-color-canvas',true));
-    c.addEventListener('touchend',e=>{e.preventDefault();pickFromCanvas(e,'bg-color-canvas',true);},{passive:false});
-    c._wired=true;
-  }
+  // Wire up canvas drag (idempotent via _wheelWired flag)
+  attachWheelEvents('bg-color-canvas',true);
   setBgTab('day');
   document.getElementById('sheet-bg-color').classList.add('open');
 }
@@ -1019,7 +1074,7 @@ function closeBgSheet(){
   const dayDot=document.getElementById('bg-day-dot');
   const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#968EAF';
   closeSheet('sheet-bg-color');
 }
 
@@ -1036,15 +1091,16 @@ function applyBgColor(){
   document.documentElement.style.setProperty('--bg',pickedBgColor);
   const dayDot=document.getElementById('bg-day-dot');
   const nightDot=document.getElementById('bg-night-dot');
-  if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
+  syncBgDots();
 }
+
+function syncBgDots(){const dayDot=document.getElementById('bg-day-dot');const nightDot=document.getElementById('bg-night-dot');if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#968EAF';}
 
 function applyStoredColors(){
   const isNight=document.body.classList.contains('night-mode');
   if(DB.prefs.bgColor&&!DB.prefs.bgColorDay){DB.prefs.bgColorDay=DB.prefs.bgColor;delete DB.prefs.bgColor;save();}
   const dayColor=DB.prefs.bgColorDay||'#FFEDDD';
-  const nightColor=DB.prefs.bgColorNight||'#2D1F4A';
+  const nightColor=DB.prefs.bgColorNight||'#968EAF';
   document.documentElement.style.setProperty('--bg',isNight?nightColor:dayColor);
 }
 
@@ -1167,7 +1223,40 @@ function generateOutfit(preserveItems){
   const dirtyPool=pool;
   pool=pool.filter(i=>!i.lastWorn||new Date(i.lastWorn).getTime()<=laundryCutoff);
 
-  function score(i){let s=100+Math.random()*15;if(isWknd&&i.weekendOk)s+=20;if(!isWknd&&i.weekdayOk)s+=20;if(i.lastWorn&&new Date(i.lastWorn).getTime()>laundryCutoff)s-=40;return s;}
+  // Season filter: if item has seasons assigned, only suggest in matching season
+  const season=currentSeason();
+  pool=pool.filter(i=>!i.seasons||i.seasons.length===0||i.seasons.includes(season));
+  const dirtyPoolSeasonal=dirtyPool.filter(i=>!i.seasons||i.seasons.length===0||i.seasons.includes(season));
+
+  // ── Intelligence layer: use feedback history to bias scoring ─────────────
+  // Build a per-item comfort score from logged ratings at similar temperatures
+  function itemComfortScore(item){
+    const ratings=item.feedbackCount>0?(item._ratingCache||buildRatingCache(item)):null;
+    if(!ratings)return 0;
+    // At current temp band, what's the average rating delta?
+    const band=Math.round(tempF/10)*10; // round to nearest 10°F band
+    const bandRatings=ratings.filter(r=>Math.abs(r.temp-band)<=8);
+    if(!bandRatings.length)return 0;
+    const avg=bandRatings.reduce((s,r)=>s+r.delta,0)/bandRatings.length;
+    return avg*15; // scale: ±15 points max influence
+  }
+  function buildRatingCache(item){
+    const deltas={tooHot:-2,warm:-1,justRight:0,cool:1,tooCold:2};
+    const logs=DB.logs.filter(l=>l.itemIDs&&l.itemIDs.includes(item.id)&&l.itemRatings&&l.itemRatings[item.id]);
+    const cache=logs.map(l=>({temp:l.tempF||tempF,delta:deltas[l.itemRatings[item.id]]||0}));
+    item._ratingCache=cache;
+    return cache;
+  }
+
+  function score(i){
+    let s=100+Math.random()*15;
+    if(isWknd&&i.weekendOk)s+=20;
+    if(!isWknd&&i.weekdayOk)s+=20;
+    if(i.lastWorn&&new Date(i.lastWorn).getTime()>laundryCutoff)s-=40;
+    // Intelligence: boost items rated comfortable at this temp, penalise ones rated off
+    s+=itemComfortScore(i);
+    return s;
+  }
   function best(arr,fallbackArr){
     // arr = clean items for this slot, fallbackArr = includes dirty items (fallback if all in laundry)
     if(preserveItems){const src=arr.length?arr:(fallbackArr||arr);return src.sort((a,b)=>score(b)-score(a))[0]||null;}
@@ -1189,7 +1278,7 @@ function generateOutfit(preserveItems){
   // We build a scored pool but guarantee something is picked if any top exists.
 
   const allShirts=pool.filter(i=>i.category==='tops'&&i.subcategory!=='dress');
-  const allShirtsDirty=dirtyPool.filter(i=>i.category==='tops'&&i.subcategory!=='dress');
+  const allShirtsDirty=dirtyPoolSeasonal.filter(i=>i.category==='tops'&&i.subcategory!=='dress');
 
   const preferredShirts=allShirts.filter(i=>{
     if(i.subcategory==='tankTop')    return tempF>=68;
@@ -1205,17 +1294,17 @@ function generateOutfit(preserveItems){
   const shirtPoolDirty=preferredShirtsDirty.length>0?preferredShirtsDirty:allShirtsDirty;
 
   const dressPool=pool.filter(i=>i.subcategory==='dress'&&tempF>=50);
-  const dressPoolDirty=dirtyPool.filter(i=>i.subcategory==='dress'&&tempF>=50);
+  const dressPoolDirty=dirtyPoolSeasonal.filter(i=>i.subcategory==='dress'&&tempF>=50);
 
   const outerPool=tempF<65?pool.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF)):[];
-  const outerPoolDirty=tempF<65?dirtyPool.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF)):[];
+  const outerPoolDirty=tempF<65?dirtyPoolSeasonal.filter(i=>i.category==='outerwear'&&(i.effectiveWarmth||i.warmth||3)>=warmthMin(tempF)):[];
 
   const botPool=pool.filter(i=>i.category==='bottoms').filter(i=>i.subcategory==='shorts'?tempF>=65:true);
-  const botPoolDirty=dirtyPool.filter(i=>i.category==='bottoms').filter(i=>i.subcategory==='shorts'?tempF>=65:true);
+  const botPoolDirty=dirtyPoolSeasonal.filter(i=>i.category==='bottoms').filter(i=>i.subcategory==='shorts'?tempF>=65:true);
   const shoePool=pool.filter(i=>i.category==='shoes');
-  const shoePoolDirty=dirtyPool.filter(i=>i.category==='shoes');
+  const shoePoolDirty=dirtyPoolSeasonal.filter(i=>i.category==='shoes');
   const sockPool=pool.filter(i=>i.category==='socks');
-  const sockPoolDirty=dirtyPool.filter(i=>i.category==='socks');
+  const sockPoolDirty=dirtyPoolSeasonal.filter(i=>i.category==='socks');
 
   const newO={};
 
@@ -1515,6 +1604,41 @@ function saveFeedback(){
 }
 function closeFeedback(){document.getElementById('sheet-feedback').classList.remove('open');}
 
+// ── Favourites view ───────────────────────────────────────────────────────
+function renderFavourites(list){
+  // Outfits rated "great" overall, sorted by how often that exact combo was worn
+  const favLogs=DB.logs.filter(l=>l.overallFeel==='great');
+  if(!favLogs.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">⭐</div><div class="empty-text">No favourite outfits yet. Rate an outfit "Great" to see it here.</div></div>';
+    return;
+  }
+  // Group by combo key, count frequency
+  const comboCounts={};
+  const comboExample={};
+  favLogs.forEach(log=>{
+    const key=(log.itemIDs||[]).slice().sort().join('|');
+    comboCounts[key]=(comboCounts[key]||0)+1;
+    if(!comboExample[key]||new Date(log.date)>new Date(comboExample[key].date))comboExample[key]=log;
+  });
+  const sorted=Object.keys(comboCounts).sort((a,b)=>comboCounts[b]-comboCounts[a]);
+  const intro=document.createElement('div');
+  intro.style.cssText='font-size:11px;color:var(--faint);text-align:center;padding:2px 0 6px;';
+  intro.textContent='Outfits you rated Great — sorted by how often you wore them';
+  list.appendChild(intro);
+  sorted.forEach(key=>{
+    const log=comboExample[key];
+    const count=comboCounts[key];
+    const d=new Date(log.date);
+    const dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const div=document.createElement('div');div.className='log-row';
+    div.style.borderColor='#FACA78';div.style.borderWidth='1.5px';
+    const inner=document.createElement('div');inner.className='log-inner';
+    inner.innerHTML=`<div class="log-date">Last worn ${dateStr} · worn ${count}× as a combo</div><div class="log-items">${log.itemNames}</div><span class="log-feel feel-great">Great</span>`;
+    div.appendChild(inner);
+    list.appendChild(div);
+  });
+}
+
 // ── Wardrobe ──────────────────────────────────────────────────────────────
 let wardrobeFilter='all';
 // Compute wear count from history (so deleting a log decrements the tally)
@@ -1536,12 +1660,13 @@ function renderWardrobe(){
     const sub=subByKey(item.subcategory);const cls=badgeCls(item);
     const blob=item.color?`<span class="color-blob" style="background:${item.color};"></span>`:'';
     const officeDot=item.officeOk===true?'<span style="font-size:10px;margin-left:3px;opacity:.6;">💼</span>':'';
+    const seasonDot=item.seasons&&item.seasons.length?`<span style="font-size:10px;margin-left:3px;opacity:.6;">${item.seasons.map(s=>({spring:'🌸',summer:'☀️',fall:'🍂',winter:'❄️'}[s]||'')).join('')}</span>`:'';
     const wearCount=getWearCount(item.id);
     const wearBadge=wearCount>0
       ?`<span style="font-size:10px;font-weight:600;color:var(--faint);min-width:28px;text-align:right;">${wearCount}×</span>`
       :'';
     const div=document.createElement('div');div.className='list-item';
-    div.innerHTML=`<div style="flex:1;min-width:0;"><div class="item-name">${item.name}${officeDot}</div></div><div class="item-right">${wearBadge}<span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
+    div.innerHTML=`<div style="flex:1;min-width:0;"><div class="item-name">${item.name}${officeDot}${seasonDot}</div></div><div class="item-right">${wearBadge}<span class="badge ${cls}">${sub.label}</span>${blob}</div>`;
     div.onclick=()=>openEditItem(item);list.appendChild(div);
   });
 }
@@ -1563,6 +1688,7 @@ function openAddItem(){
   buildTypeGrid(null);selectWarmth(2);
   drawColorWheel('color-canvas',75);syncItemColorPreview();
   document.getElementById('color-swatches').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  syncSeasonChips([]);
   document.getElementById('sheet-item').classList.add('open');
 }
 function openEditItem(item){
@@ -1579,6 +1705,7 @@ function openEditItem(item){
   document.getElementById('brightness-slider').value=75;
   buildTypeGrid(item.subcategory);selectWarmth(Math.round(item.effectiveWarmth||item.warmth||2));
   drawColorWheel('color-canvas',75);syncItemColorPreview();
+  syncSeasonChips(item.seasons||[]);
   document.getElementById('sheet-item').classList.add('open');
 }
 function buildTypeGrid(sel){
@@ -1597,9 +1724,11 @@ function saveItem(){
     editingItem.name=name;editingItem.subcategory=selectedSubcategory;editingItem.category=sub.cat;
     editingItem.effectiveWarmth=selectedWarmth;editingItem.weekdayOk=wd;editingItem.weekendOk=we;
     editingItem.officeOk=off;editingItem.excludeFromSuggestions=sub.cat==='formal';editingItem.color=pickedColor;
+    editingItem.seasons=[...selectedSeasons];
   }else{
     DB.items.push({id:uid(),name,subcategory:selectedSubcategory,category:sub.cat,warmth:sub.warmth,
       effectiveWarmth:selectedWarmth,baseWarmth:sub.warmth,weekdayOk:wd,weekendOk:we,officeOk:off,
+      seasons:[...selectedSeasons],
       excludeFromSuggestions:sub.cat==='formal',isArchived:false,lastWorn:null,timesWorn:0,
       feedbackCount:0,dateAdded:new Date().toISOString(),color:pickedColor});
   }
@@ -1622,6 +1751,11 @@ function restoreItem(id){const item=DB.items.find(i=>i.id===id);if(!item)return;
 // ── History ───────────────────────────────────────────────────────────────
 function renderHistory(){
   const list=document.getElementById('history-list');list.innerHTML='';
+
+  if(histTab==='fav'){
+    renderFavourites(list);return;
+  }
+
   if(!DB.logs.length){list.innerHTML='<div class="empty"><div class="empty-icon">🕐</div><div class="empty-text">No history yet. Log an outfit from the Today tab.</div></div>';return;}
   const hint=document.createElement('div');
   hint.style.cssText='font-size:11px;color:var(--faint);text-align:center;padding:2px 0 6px;';
@@ -1705,6 +1839,37 @@ function updateLaundryCycle(val){
   save();
   generateOutfit();
 }
+// ── Season tagging ────────────────────────────────────────────────────────
+let selectedSeasons=new Set();
+function currentSeason(){
+  const m=new Date().getMonth(); // 0-11
+  if(m>=2&&m<=4)  return 'spring';
+  if(m>=5&&m<=7)  return 'summer';
+  if(m>=8&&m<=10) return 'fall';
+  return 'winter';
+}
+function toggleSeason(btn,season){
+  if(selectedSeasons.has(season)){selectedSeasons.delete(season);btn.classList.remove('selected');}
+  else{selectedSeasons.add(season);btn.classList.add('selected');}
+}
+function syncSeasonChips(seasons){
+  selectedSeasons=new Set(seasons||[]);
+  document.querySelectorAll('#season-chips .type-chip').forEach(btn=>{
+    btn.classList.toggle('selected',selectedSeasons.has(btn.dataset.season));
+  });
+}
+
+// ── History tabs ──────────────────────────────────────────────────────────
+let histTab='log';
+function setHistTab(tab){
+  histTab=tab;
+  const logBtn=document.getElementById('hist-tab-log');
+  const favBtn=document.getElementById('hist-tab-fav');
+  if(logBtn){logBtn.className=tab==='log'?'btn btn-primary':'btn btn-secondary';logBtn.style.fontSize='13px';logBtn.style.padding='9px 0';}
+  if(favBtn){favBtn.className=tab==='fav'?'btn btn-primary':'btn btn-secondary';favBtn.style.fontSize='13px';favBtn.style.padding='9px 0';}
+  renderHistory();
+}
+
 function saveName(){DB.prefs.name=document.getElementById('name-input').value.trim();save();renderGreeting();}
 function updateBackupStatus(){const el=document.getElementById('backup-status');if(el)el.textContent=`${DB.items.filter(i=>!i.isArchived).length} items · ${DB.logs.length} logs`;}
 function updateSettingsCounts(){
@@ -1718,7 +1883,7 @@ function updateSettingsCounts(){
   setTempUnit(DB.prefs.tempUnit||'F');
   const dayDot=document.getElementById('bg-day-dot');const nightDot=document.getElementById('bg-night-dot');
   if(dayDot)dayDot.style.background=DB.prefs.bgColorDay||'#FFEDDD';
-  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#2D1F4A';
+  if(nightDot)nightDot.style.background=DB.prefs.bgColorNight||'#968EAF';
 }
 function updateOffset(val){DB.prefs.offset=parseInt(val);document.getElementById('offset-label').textContent=`${val>=0?'+':''}${val}${unitStr()}`;save();if(wxSnapshot)updateWxCard(wxSnapshot);generateOutfit(true);}
 function openBackup(){const ar=DB.items.filter(i=>i.isArchived).length;document.getElementById('backup-stats').innerHTML=`Wardrobe items: <strong>${DB.items.filter(i=>!i.isArchived).length}</strong> active, ${ar} archived<br>Outfit logs: <strong>${DB.logs.length}</strong><br>Temp offset: <strong>${(DB.prefs.offset||0)>=0?'+':''}${DB.prefs.offset||0}°F</strong>`;document.getElementById('sheet-backup').classList.add('open');}
@@ -1732,7 +1897,7 @@ function switchTab(tab){
   document.getElementById('screen-'+tab).classList.add('active');
   document.getElementById('nav-'+tab).classList.add('active');
   if(tab==='wardrobe')renderWardrobe();
-  if(tab==='history')renderHistory();
+  if(tab==='history'){setHistTab(histTab);}
   if(tab==='settings'){updateSettingsCounts();document.getElementById('name-input').value=DB.prefs.name||'';}
 }
 function closeSheet(id){document.getElementById(id).classList.remove('open');}
