@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;font-
 .screen.active{display:flex;flex-direction:column;gap:10px;}
 
 /* Nav */
-#nav{display:grid;grid-template-columns:1fr 1fr 56px 1fr 1fr;background:var(--card);border-top:0.5px solid var(--border);padding-bottom:var(--safe-bot);flex-shrink:0;align-items:center;transition:background .4s,border-color .4s;}
+#nav{display:grid;grid-template-columns:1fr 1fr 56px 1fr 1fr;background:var(--card);border-top:0.5px solid var(--border);padding-bottom:var(--safe-bot);flex-shrink:0;align-items:center;transition:background .4s,border-color .4s;overflow:visible;}
 .nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;color:var(--faint);font-size:10px;cursor:pointer;transition:color .15s;}
 .nav-btn svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke:currentColor;}
 .nav-btn.active{color:var(--primary);}
@@ -413,6 +413,8 @@ body.night-mode .feel-cold   {background:#182838;color:#A8C8E8;}
       <span id="laundry-label" style="font-size:15px;font-weight:700;min-width:52px;text-align:right;">7 days</span>
     </div>
   </div>
+  <div class="card" style="margin-top:0;">
+    <div class="card-title">Personal temp offset</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Adjust if you run hot or cold. Positive = you run cold.</div>
     <div style="display:flex;align-items:center;gap:12px;">
       <input type="range" id="offset-slider" min="-5" max="5" step="1" value="0" style="flex:1;" oninput="updateOffset(this.value)">
