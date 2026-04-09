@@ -1109,7 +1109,7 @@ function closeBgSheet(){
 
 function previewBgLive(hex){
   // Show color immediately so user gets visual feedback even in opposite mode
-  document.documentElement.style.setProperty('--bg',hex);
+  document.body.style.setProperty('--bg',hex);
 }
 
 function applyBgColor(){
@@ -1118,7 +1118,7 @@ function applyBgColor(){
   save();
   // Set a lock so applyStoredColors won't override this for 30 seconds
   window._bgLockUntil=Date.now()+30000;
-  document.documentElement.style.setProperty('--bg',pickedBgColor);
+  document.body.style.setProperty('--bg',pickedBgColor);
   syncBgDots();
 }
 
@@ -1135,7 +1135,7 @@ function applyStoredColors(){
   if(DB.prefs.bgColor&&!DB.prefs.bgColorDay){DB.prefs.bgColorDay=DB.prefs.bgColor;delete DB.prefs.bgColor;save();}
   const dayColor=DB.prefs.bgColorDay||'#FFEDDD';
   const nightColor=DB.prefs.bgColorNight||'#968EAF';
-  document.documentElement.style.setProperty('--bg',isNight?nightColor:dayColor);
+  document.body.style.setProperty('--bg',isNight?nightColor:dayColor);
 }
 
 function resetBgColor(){
